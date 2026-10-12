@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Name — Memento Mori Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Special+Elite&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="dark" aria-hidden="true"></div>
+
+<header class="bar">
+  <a href="#top" class="mark">Dept. of the Deceased</a>
+  <nav>
+    <a href="#report">Report</a>
+    <a href="#drawers">Cold storage</a>
+    <a href="#vitals">Vitals</a>
+    <a href="#last-words">Last words</a>
+    <button id="lights" class="toggle" aria-pressed="true">Torch: on</button>
+    <button id="penalty" class="toggle" aria-pressed="true">Penalty: on</button>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="tag" aria-label="Toe tag">
+      <span class="hole"></span>
+      <p class="tag-k">Name</p><h1>Kent Bryan A. Palarao</h1>
+      <p class="tag-k">Role</p><p class="tag-v">Immersion Student</p>
+      <p class="tag-k">Status</p><p class="tag-v" id="status">Alive. For now.</p>
+    </div>
+    <div class="hero-copy">
+      <p class="lede">Everything you build and experience will outlive you. I make sure it is worth the effort.</p>
+      <div class="monitor">
+        <canvas id="ecg" width="900" height="140" role="img" aria-label="Heartbeat monitor"></canvas>
+        <span class="beacon" aria-hidden="true"></span>
+      </div>
+      <p class="pulse" id="pulse">Pulse: 72 bpm <span>(click the monitor when it stops)</span></p>
+    </div>
+  </section>
+
+  <section id="report" class="wrap">
+    <h2>Autopsy report</h2>
+    <div class="cols">
+      <p>I am an Immersion student with some experience building things people use and, occasionally, things people fear. I treat every project like a body on the table: study it, open it carefully, and find out what actually kept it alive.</p>
+      <p>Cause of obsession: Human's sudden change in emotion.<br> Time of arrival: undetermined. <br>Currently residing in Iligan City.</p>
+  </section>
+
+  <section id="drawers" class="wrap">
+    <h2>Cold storage</h2>
+    <p class="sub">Selected works, filed by case. Pull a drawer to open it.</p>
+    <div id="cabinet"></div>
+  </section>
+
+  <section id="vitals" class="wrap">
+    <h2>Vital signs</h2>
+    <ul class="vitals" id="skills"></ul>
+  </section>
+
+  <section id="last-words" class="wrap">
+    <h2>Last words</h2>
+    <p class="big">If you are reading this, you have already opened the door. <a href="mailto:bryanpalarao57@Gmail.com">bryanpalarao57@Gmail.com</a></p>
+    <p class="links"><a href="https://github.com/WanderingDawn">GitHub</a></p>
+  </section>
+</main>
+
+<footer>Born 2008. Buried under deadlines. &copy; <span id="yr"></span> Kent Bryan A. Palarao.</footer>
+<script src="script.js"></script>
+</body>
+</html>

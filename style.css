@@ -1,0 +1,89 @@
+:root{
+  --soil:#0d0c0a; --slab:#16191a; --steel:#2b3133; --bone:#ddd5bf; --pallor:#93a08f;
+  --blood:#8a1515; --blood-lit:#c42626; --tag:#cdbd8d;
+  --serif:"IM Fell English",Georgia,serif; --type:"Special Elite","Courier New",monospace;
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--soil);color:var(--bone);font:1.15rem/1.7 var(--serif);overflow-x:hidden}
+a{color:var(--bone)}
+a:hover{color:var(--blood-lit)}
+:focus-visible{outline:2px solid var(--blood-lit);outline-offset:3px}
+code{font-family:var(--type);color:var(--tag)}
+
+/* torch: darkness that follows the cursor */
+#dark{position:fixed;inset:0;z-index:50;pointer-events:none;
+  background:radial-gradient(circle var(--r,260px) at var(--mx,50%) var(--my,40%),transparent 0,rgba(0,0,0,var(--m,.35)) 55%,rgba(0,0,0,var(--o,.88)) 100%);
+  transition:opacity .4s}
+#dark.off{opacity:0}
+#dark.off.pen{opacity:1} /* the penalty still bites with the torch off */
+@media (hover:none){#dark{display:none}.toggle{display:none}}
+
+/* flickering strip light */
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:3px;z-index:60;
+  background:var(--pallor);box-shadow:0 0 30px 6px rgba(147,160,143,.4);animation:flick 7s infinite}
+@keyframes flick{0%,100%{opacity:1}41%{opacity:1}42%{opacity:.1}43%{opacity:1}45%{opacity:.2}46%{opacity:1}80%{opacity:.7}81%{opacity:1}}
+
+.bar{position:sticky;top:0;z-index:40;display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;justify-content:space-between;
+  align-items:center;padding:.9rem clamp(1rem,4vw,3rem);background:rgba(13,12,10,.92);border-bottom:1px solid var(--steel)}
+.mark{font-family:var(--type);text-decoration:none;color:var(--pallor)}
+nav{display:flex;flex-wrap:wrap;gap:.3rem 1.4rem;align-items:center;font-size:1rem}
+nav a{text-decoration:none}
+.toggle{font:.9rem var(--type);background:none;color:var(--tag);border:1px solid var(--steel);padding:.2rem .7rem;cursor:pointer}
+
+.hero{display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:clamp(2rem,6vw,5rem);align-items:center;
+  min-height:88vh;padding:3rem clamp(1rem,4vw,3rem)}
+.tag{position:relative;background:var(--tag);color:#1a160c;padding:2.2rem 1.6rem 1.6rem;border-radius:10px 10px 40px 40px;
+  transform-origin:50% -30px;animation:sway 6s ease-in-out infinite;box-shadow:0 20px 40px rgba(0,0,0,.7)}
+.tag::before{content:"";position:absolute;left:50%;top:-90px;width:2px;height:90px;background:var(--tag)}
+.hole{position:absolute;top:.7rem;left:50%;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:var(--soil)}
+.tag h1{font:400 2.4rem/1.1 var(--serif);margin-bottom:.8rem}
+.tag-k{font:.8rem var(--type);color:var(--blood);letter-spacing:.05em}
+.tag-v{font-family:var(--type);margin-bottom:.8rem}
+@keyframes sway{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}}
+
+.lede{font-size:clamp(1.7rem,3.6vw,2.8rem);line-height:1.25;margin-bottom:2rem;max-width:22ch}
+#ecg{display:block;width:100%;max-width:700px;height:auto;background:var(--slab);border:1px solid var(--steel);cursor:pointer}
+/* dim beacon: sits above the darkness so the monitor can always be found */
+.monitor{position:relative;max-width:700px}
+.beacon{position:absolute;inset:-4px;z-index:55;pointer-events:none;border:1px solid rgba(147,160,143,.28);
+  box-shadow:0 0 28px 6px rgba(147,160,143,.16),inset 0 0 24px rgba(147,160,143,.1);animation:breathe 4s ease-in-out infinite}
+.monitor.dead .beacon{border-color:rgba(196,38,38,.45);animation-duration:1.6s;
+  box-shadow:0 0 36px 10px rgba(196,38,38,.26),inset 0 0 28px rgba(196,38,38,.18)}
+@keyframes breathe{0%,100%{opacity:.55}50%{opacity:1}}
+.pulse{font:.95rem var(--type);color:var(--pallor);margin-top:.6rem}
+.pulse span{color:var(--steel)}
+.pulse.dead{color:var(--blood-lit)}
+
+.wrap{max-width:980px;margin:0 auto;padding:6rem clamp(1rem,4vw,3rem) 2rem}
+h2{font:400 clamp(2rem,5vw,3.2rem)/1.1 var(--serif);margin-bottom:1.5rem;color:var(--bone)}
+.sub{color:var(--pallor);margin-bottom:2rem}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem;max-width:80ch}
+
+/* the cabinet */
+#cabinet{background:var(--steel);padding:10px;border:1px solid #3a4245;display:grid;gap:10px}
+.drawer{background:var(--slab);border:1px solid #394144}
+.drawer>button{width:100%;display:flex;justify-content:space-between;align-items:center;gap:1rem;text-align:left;
+  background:linear-gradient(#20262a,#171b1d);color:var(--bone);border:0;padding:1.1rem 1.3rem;font:1.3rem var(--serif);cursor:pointer}
+.drawer>button:hover{background:linear-gradient(#262d31,#1b2023)}
+.case{font:.85rem var(--type);color:var(--tag);border:1px solid var(--tag);padding:.1rem .6rem;white-space:nowrap;background:rgba(205,189,141,.06)}
+.slide{display:grid;grid-template-rows:0fr;transition:grid-template-rows .6s cubic-bezier(.3,.8,.3,1)}
+.slide>div{overflow:hidden}
+.drawer.open .slide{grid-template-rows:1fr}
+.body{padding:1.4rem 1.3rem 1.6rem;border-top:1px solid #394144;display:grid;gap:1rem}
+.cloth{height:130px;background:repeating-linear-gradient(45deg,#1d2326 0 8px,#222a2e 8px 16px);
+  display:flex;align-items:center;justify-content:center;font:.9rem var(--type);color:var(--pallor);border:1px dashed var(--steel)}
+.meta{font:.9rem var(--type);color:var(--pallor)}
+.meta b{color:var(--blood-lit);font-weight:400}
+
+.vitals{list-style:none;padding:0;display:grid;gap:1rem;max-width:640px}
+.vitals li{display:grid;grid-template-columns:9rem 1fr;gap:1rem;align-items:center;font-family:var(--type);font-size:.95rem}
+.bar-bg{height:6px;background:var(--steel)}
+.bar-fill{height:100%;width:0;background:var(--blood);transition:width 1.6s ease}
+
+.big{font-size:clamp(1.4rem,3vw,2rem);line-height:1.4;max-width:30ch}
+.links{margin-top:1.5rem;display:flex;gap:1.5rem;font-family:var(--type)}
+footer{margin-top:7rem;padding:2rem;text-align:center;font:.9rem var(--type);color:var(--steel);border-top:1px solid var(--slab)}
+
+@media (max-width:760px){.hero{grid-template-columns:1fr;padding-top:7rem}.tag{max-width:320px;margin:0 auto}.vitals li{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*,body::before{animation:none!important;transition:none!important}}
