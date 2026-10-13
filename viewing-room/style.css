@@ -1,0 +1,83 @@
+:root{--bone:#ddd5bf;--steel:#2b3133;--tag:#cdbd8d;--blood:#8a1515;--type:"Special Elite","Courier New",monospace}
+*{box-sizing:border-box;margin:0}
+body{min-height:100vh;background:#0b0f0e;color:var(--bone);font:1rem/1.5 var(--type);overflow-x:hidden}
+a{color:var(--bone)} :focus-visible{outline:2px solid #c42626;outline-offset:3px}
+
+/* the room, seen from above: tiled floor, one overhead light, darkness at the edges */
+.room{position:relative;min-height:100vh;display:grid;place-items:start center;padding:21vh 0 6vh;
+  background:linear-gradient(135deg,rgba(210,230,220,.05) 0,transparent 45%) 0 0/110px 110px,
+    linear-gradient(rgba(0,0,0,.6) 0 3px,transparent 3px) 0 0/110px 110px,linear-gradient(90deg,rgba(0,0,0,.6) 0 3px,transparent 3px) 0 0/110px 110px,#17201f}
+
+.slab{position:relative;height:min(68vh,230vw);aspect-ratio:320/800;border-radius:18px;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 1px,transparent 1px 4px),linear-gradient(90deg,#1c2326,#3a454a 50%,#1c2326);
+  box-shadow:0 30px 90px #000,inset 0 0 0 6px #232b2e,inset 0 0 0 9px #0d1214;z-index:1}
+.layer{position:absolute;inset:0;width:100%;height:100%}
+.sheet{animation:breathe 5s ease-in-out infinite;transform-origin:50% 30%}
+@keyframes breathe{50%{transform:scale(1.006,1.003)}}
+.cap{pointer-events:none;touch-action:none}
+#cover:focus{outline:none}
+#cover:focus-visible{filter:drop-shadow(0 0 5px #c42626)}
+#cover{pointer-events:all;cursor:grab;transition:transform .7s cubic-bezier(.3,1.2,.4,1)}
+#cover:hover{filter:brightness(1.08)}
+.slab.dragging #cover{transition:none;cursor:grabbing}
+
+/* the face: an oval of photograph, feathered into the slab */
+.face{position:absolute;left:34%;top:3.6%;width:32%;height:16.4%;opacity:0;transition:opacity .15s;
+  -webkit-mask-image:radial-gradient(ellipse at 50% 50%,#000 48%,transparent 68%);mask-image:radial-gradient(ellipse at 50% 50%,#000 48%,transparent 68%)}
+.revealed .face{opacity:1;cursor:zoom-in}
+.face.glitch{transform:translateX(2px);filter:contrast(1.4) hue-rotate(20deg)}
+
+.tag{position:absolute;right:-.5rem;bottom:6%;transform:rotate(8deg);background:var(--tag);color:#1a160c;padding:.35rem .7rem;display:grid;font-size:.75rem;box-shadow:0 8px 16px rgba(0,0,0,.6);border-radius:3px 3px 12px 12px}
+.tag b{color:var(--blood)}
+.hint{position:fixed;left:0;right:0;bottom:3.6rem;text-align:center;color:#7d8d88;font-size:.9rem;z-index:3;text-shadow:0 0 6px #000}
+
+.ui{position:fixed;left:0;right:0;bottom:0;z-index:59;display:flex;flex-wrap:wrap;gap:.5rem 1rem;justify-content:center;align-items:center;padding:.7rem;background:linear-gradient(transparent,rgba(0,0,0,.85))}
+.btn{font:.85rem var(--type);color:var(--tag);background:rgba(9,13,12,.9);border:1px solid var(--steel);padding:.25rem .8rem;cursor:pointer}
+.ui a{font-size:.85rem}
+
+#view{position:fixed;inset:0;z-index:56;background:rgba(0,0,0,.94);display:grid;place-items:center;cursor:zoom-out}
+#view[hidden]{display:none}
+#big{max-width:94vw;max-height:92vh;box-shadow:0 0 80px #000}
+#flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:61}
+#flash.go{animation:flash .9s ease-out}
+@keyframes flash{0%{opacity:.95}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---- lights, shared with the portfolio ---- */
+/* torch: darkness that follows the cursor */
+#dark{position:fixed;inset:0;z-index:50;pointer-events:none;
+  background:radial-gradient(circle var(--r,260px) at var(--mx,50%) var(--my,40%),transparent 0,rgba(0,0,0,var(--m,.35)) 55%,rgba(0,0,0,var(--o,.88)) 100%);
+  transition:opacity .4s}
+#dark.off{opacity:0}
+/* torch off: a fixed shaft of light down the middle of the page, dark at the sides.
+   The penalty still applies: it narrows the shaft and deepens the dark. */
+@property --k{syntax:"<number>";inherits:false;initial-value:.92}
+#beam{--k:.92;position:fixed;inset:0;z-index:50;pointer-events:none;opacity:0;transition:opacity .2s,--k .18s;
+  background:
+    linear-gradient(90deg,transparent calc(50% - 24%),rgba(200,214,196,calc(var(--t,.07) * (1 - var(--k) / .92))) 50%,transparent calc(50% + 24%)),
+    linear-gradient(90deg,
+    rgba(0,0,0,max(var(--o,.82),var(--k))) 0,
+    rgba(0,0,0,max(var(--m,.22),var(--k))) calc(50% - var(--bw,26%)),
+    rgba(0,0,0,var(--k)) 50%,
+    rgba(0,0,0,max(var(--m,.22),var(--k))) calc(50% + var(--bw,26%)),
+    rgba(0,0,0,max(var(--o,.82),var(--k))) 100%)}
+#beam.lit{--k:0}
+#dark.off ~ #beam{opacity:1}
+
+/* hanging lamp: drops in with the torch off, then switches on; switches off, then gets hauled back up */
+#lamp{position:fixed;top:0;left:50%;width:120px;margin-left:-60px;z-index:52;pointer-events:none;
+  transform:translateY(-130%);transition:transform .9s cubic-bezier(.6,0,.9,.5)}
+#lamp.down{transform:none;transition-duration:1s;transition-timing-function:cubic-bezier(.3,1.45,.5,1)}
+.lamp-swing{position:relative;height:190px;transform-origin:50% 0}
+#lamp.down .lamp-swing{animation:lswing 2.6s ease-out .6s both}
+.cone,.halo,.inner,.fil{opacity:0;transition:opacity .08s}
+.bulb{fill:#262d30;stroke:#3a444a;stroke-width:.8}
+#lamp.on .cone,#lamp.on .halo,#lamp.on .inner{opacity:var(--lit,1)}
+#lamp.on .fil{opacity:var(--lit,1)}
+#lamp.on .bulb{fill:url(#bulbG);stroke:none;opacity:var(--lit,1)}
+@keyframes lswing{0%{transform:rotate(7deg)}20%{transform:rotate(-5deg)}40%{transform:rotate(3.5deg)}60%{transform:rotate(-2deg)}80%{transform:rotate(1deg)}100%{transform:rotate(0)}}
+/* flickering strip light */
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:3px;z-index:60;
+  background:var(--pallor);box-shadow:0 0 30px 6px rgba(147,160,143,.4);animation:flick 7s infinite}
+@keyframes flick{0%,100%{opacity:1}41%{opacity:1}42%{opacity:.1}43%{opacity:1}45%{opacity:.2}46%{opacity:1}80%{opacity:.7}81%{opacity:1}}
+@media (hover:none){#dark,#beam,#lamp,#lights{display:none}.room{place-items:center;padding:3vh 0 6vh}.slab{height:min(78vh,230vw)}}

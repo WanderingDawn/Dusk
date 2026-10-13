@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Viewing Room — Unidentified</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="dark" aria-hidden="true"></div>
+<div id="beam" aria-hidden="true"></div>
+<div id="lamp" aria-hidden="true"><div class="lamp-swing">
+<svg viewBox="0 0 120 190" width="120" height="190" style="overflow:visible">
+  <defs>
+    <linearGradient id="shadeG" x1="0" x2="1"><stop offset="0" stop-color="#1b2124"/><stop offset=".35" stop-color="#5a676e"/><stop offset=".62" stop-color="#3a444a"/><stop offset="1" stop-color="#14191b"/></linearGradient>
+    <radialGradient id="bulbG"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#eef3e6"/><stop offset="1" stop-color="#b9c7b0"/></radialGradient>
+    <radialGradient id="haloG"><stop offset="0" stop-color="#d6e3cf" stop-opacity=".6"/><stop offset="1" stop-color="#d6e3cf" stop-opacity="0"/></radialGradient>
+    <linearGradient id="coneG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d6e3cf" stop-opacity=".26"/><stop offset="1" stop-color="#d6e3cf" stop-opacity="0"/></linearGradient>
+  </defs>
+  <polygon class="cone" points="36,152 84,152 190,430 -70,430" fill="url(#coneG)"/>
+  <rect x="46" y="0" width="28" height="7" rx="2" fill="#2a3134"/>
+  <line x1="60" y1="7" x2="60" y2="86" stroke="#232a2d" stroke-width="3.5"/>
+  <line x1="60" y1="7" x2="60" y2="86" stroke="#4d595e" stroke-width="3.5" stroke-dasharray="1.4 3.6"/>
+  <rect x="53" y="84" width="14" height="14" rx="2" fill="#303a3e" stroke="#0b0e0f" stroke-width=".6"/>
+  <path d="M60 98C49 98 41 106 32 130L21 147Q19 152 25 152L95 152Q101 152 99 147L88 130C79 106 71 98 60 98Z" fill="url(#shadeG)" stroke="#0b0e0f"/>
+  <path d="M46 111C42 120 38 130 32 141" stroke="rgba(255,255,255,.2)" fill="none" stroke-width="2" stroke-linecap="round"/>
+  <rect x="21" y="148" width="78" height="5" rx="2.5" fill="#20272a" stroke="#0b0e0f" stroke-width=".6"/>
+  <ellipse class="inner" cx="60" cy="153" rx="36" ry="3.5" fill="#e6efde"/>
+  <circle class="halo" cx="60" cy="162" r="50" fill="url(#haloG)"/>
+  <circle class="bulb" cx="60" cy="161" r="9"/>
+  <path class="fil" d="M56.5 161l1.75-3.5 1.75 3.5 1.75-3.5 1.75 3.5" stroke="#ffb860" fill="none" stroke-width="1"/>
+  <g stroke="#7f8b8f" stroke-width=".8" fill="none" opacity=".75"><path d="M51 157Q60 178 69 157"/><path d="M60 154V172"/><path d="M52 164H68"/></g>
+</svg>
+</div></div>
+<main class="room">
+  <div class="slab" id="slab">
+    <!-- below the face: bare neck + the sheet from the shoulders down -->
+    <svg class="layer sheet" viewBox="0 0 320 800" aria-hidden="true">
+      <defs>
+        <linearGradient id="cloth" x1="0" x2="1"><stop offset="0" stop-color="#6f7b78"/><stop offset=".35" stop-color="#b4bfbb"/><stop offset=".7" stop-color="#8f9b97"/><stop offset="1" stop-color="#5d6966"/></linearGradient>
+        <radialGradient id="bump"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+        <filter id="weave"><feTurbulence baseFrequency=".9" numOctaves="2" result="n"/><feColorMatrix in="n" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .5 -.12"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+      </defs>
+      <path d="M142 140h36l6 42h-48z" fill="#a39a8c"/>
+      <path id="body" d="M118 170Q160 152 202 170L262 192Q284 204 282 242L276 500Q276 560 270 640L262 770Q260 790 240 790H80Q60 790 58 770L50 640Q44 560 44 500L38 242Q36 204 58 192Z" fill="url(#cloth)" stroke="#3b4442" stroke-width="2"/>
+      <g fill="url(#bump)"><ellipse cx="96" cy="215" rx="52" ry="26"/><ellipse cx="224" cy="215" rx="52" ry="26"/><ellipse cx="160" cy="300" rx="62" ry="70"/><ellipse cx="160" cy="470" rx="70" ry="50"/><ellipse cx="116" cy="600" rx="30" ry="46"/><ellipse cx="204" cy="600" rx="30" ry="46"/><ellipse cx="118" cy="752" rx="22" ry="26"/><ellipse cx="202" cy="752" rx="22" ry="26"/></g>
+      <g fill="none" stroke="rgba(0,0,0,.2)" stroke-width="2" stroke-linecap="round"><path d="M70 300Q110 330 100 400"/><path d="M250 320Q214 350 224 430"/><path d="M60 520Q100 540 92 620"/><path d="M262 540Q222 560 230 640"/><path d="M160 520V700"/></g>
+      <rect x="38" y="160" width="250" height="640" filter="url(#weave)" opacity=".3" style="clip-path:path('M118 170Q160 152 202 170L262 192Q284 204 282 242L276 500Q276 560 270 640L262 770Q260 790 240 790H80Q60 790 58 770L50 640Q44 560 44 500L38 242Q36 204 58 192Z')"/>
+    </svg>
+    <canvas id="face" class="face" width="420" height="560" aria-label="The face under the sheet"></canvas>
+    <!-- above the face: the sheet over the head. Drag it down, or just click it. -->
+    <svg class="layer cap" viewBox="0 0 320 800">
+      <g id="cover" tabindex="0" role="button" aria-label="Pull back the sheet">
+        <path d="M160 18C98 18 92 92 102 128C106 150 72 160 60 198L260 198C248 160 214 150 218 128C228 92 222 18 160 18Z" fill="url(#cloth)" stroke="#3b4442" stroke-width="2"/>
+        <ellipse cx="160" cy="80" rx="46" ry="60" fill="url(#bump)"/>
+        <g fill="none" stroke="rgba(0,0,0,.22)" stroke-width="2" stroke-linecap="round"><path d="M104 130Q130 150 120 186"/><path d="M216 130Q190 150 200 186"/><path d="M140 60Q150 100 146 130"/></g>
+        <path d="M64 192Q160 208 256 192" fill="none" stroke="rgba(0,0,0,.28)" stroke-width="3"/>
+      </g>
+    </svg>
+    <div class="tag" id="tag"><b>UNIDENTIFIED</b><span>SLAB 07</span></div>
+  </div>
+  <p class="hint" id="hint">Something is under the sheet.</p>
+</main>
+
+<nav class="ui">
+  <a href="../index.html">&larr; Back to the portfolio</a>
+  <label class="btn">Change photo<input type="file" id="file" accept="image/*" hidden></label>
+  <button class="btn" id="next" hidden>Next photo</button>
+  <button class="btn" id="filter" aria-pressed="true">Filter: on</button>
+  <button class="btn" id="lights" aria-pressed="true">Torch: on</button>
+  <button class="btn" id="sound" aria-pressed="true">Sound: on</button>
+  <button class="btn" id="recover">Cover again</button>
+</nav>
+
+<div id="view" hidden><canvas id="big"></canvas></div>
+<div id="flash"></div>
+<script src="script.js"></script>
+</body>
+</html>
