@@ -16,8 +16,19 @@ code{font-family:var(--type);color:var(--tag)}
   background:radial-gradient(circle var(--r,260px) at var(--mx,50%) var(--my,40%),transparent 0,rgba(0,0,0,var(--m,.35)) 55%,rgba(0,0,0,var(--o,.88)) 100%);
   transition:opacity .4s}
 #dark.off{opacity:0}
-#dark.off.pen{opacity:1} /* the penalty still bites with the torch off */
-@media (hover:none){#dark{display:none}.toggle{display:none}}
+/* torch off: a fixed shaft of light down the middle of the page, dark at the sides.
+   The penalty still applies: it narrows the shaft and deepens the dark. */
+#beam{position:fixed;inset:0;z-index:50;pointer-events:none;opacity:0;transition:opacity .2s;
+  background:
+    linear-gradient(90deg,transparent calc(50% - 24%),rgba(200,214,196,var(--t,.07)) 50%,transparent calc(50% + 24%)),
+    linear-gradient(90deg,
+    rgba(0,0,0,var(--o,.82)) 0,
+    rgba(0,0,0,var(--m,.22)) calc(50% - var(--bw,26%)),
+    transparent 50%,
+    rgba(0,0,0,var(--m,.22)) calc(50% + var(--bw,26%)),
+    rgba(0,0,0,var(--o,.82)) 100%)}
+#dark.off ~ #beam{opacity:1}
+@media (hover:none){#dark,#beam{display:none}.toggle{display:none}#sound{display:inline-block}}
 
 /* flickering strip light */
 body::before{content:"";position:fixed;top:0;left:0;right:0;height:3px;z-index:60;
