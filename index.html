@@ -9,8 +9,32 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div id="room" aria-hidden="true"><span class="fog"></span></div>
 <div id="dark" aria-hidden="true"></div>
 <div id="beam" aria-hidden="true"></div>
+<div id="lamp" aria-hidden="true"><div class="lamp-swing">
+<svg viewBox="0 0 120 190" width="120" height="190" style="overflow:visible">
+  <defs>
+    <linearGradient id="shadeG" x1="0" x2="1"><stop offset="0" stop-color="#1b2124"/><stop offset=".35" stop-color="#5a676e"/><stop offset=".62" stop-color="#3a444a"/><stop offset="1" stop-color="#14191b"/></linearGradient>
+    <radialGradient id="bulbG"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#eef3e6"/><stop offset="1" stop-color="#b9c7b0"/></radialGradient>
+    <radialGradient id="haloG"><stop offset="0" stop-color="#d6e3cf" stop-opacity=".6"/><stop offset="1" stop-color="#d6e3cf" stop-opacity="0"/></radialGradient>
+    <linearGradient id="coneG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d6e3cf" stop-opacity=".26"/><stop offset="1" stop-color="#d6e3cf" stop-opacity="0"/></linearGradient>
+  </defs>
+  <polygon class="cone" points="36,152 84,152 190,430 -70,430" fill="url(#coneG)"/>
+  <rect x="46" y="0" width="28" height="7" rx="2" fill="#2a3134"/>
+  <line x1="60" y1="7" x2="60" y2="86" stroke="#232a2d" stroke-width="3.5"/>
+  <line x1="60" y1="7" x2="60" y2="86" stroke="#4d595e" stroke-width="3.5" stroke-dasharray="1.4 3.6"/>
+  <rect x="53" y="84" width="14" height="14" rx="2" fill="#303a3e" stroke="#0b0e0f" stroke-width=".6"/>
+  <path d="M60 98C49 98 41 106 32 130L21 147Q19 152 25 152L95 152Q101 152 99 147L88 130C79 106 71 98 60 98Z" fill="url(#shadeG)" stroke="#0b0e0f"/>
+  <path d="M46 111C42 120 38 130 32 141" stroke="rgba(255,255,255,.2)" fill="none" stroke-width="2" stroke-linecap="round"/>
+  <rect x="21" y="148" width="78" height="5" rx="2.5" fill="#20272a" stroke="#0b0e0f" stroke-width=".6"/>
+  <ellipse class="inner" cx="60" cy="153" rx="36" ry="3.5" fill="#e6efde"/>
+  <circle class="halo" cx="60" cy="162" r="50" fill="url(#haloG)"/>
+  <circle class="bulb" cx="60" cy="161" r="9"/>
+  <path class="fil" d="M56.5 161l1.75-3.5 1.75 3.5 1.75-3.5 1.75 3.5" stroke="#ffb860" fill="none" stroke-width="1"/>
+  <g stroke="#7f8b8f" stroke-width=".8" fill="none" opacity=".75"><path d="M51 157Q60 178 69 157"/><path d="M60 154V172"/><path d="M52 164H68"/></g>
+</svg>
+</div></div>
 
 <header class="bar">
   <a href="#top" class="mark">Dept. of the Deceased</a>
@@ -39,7 +63,7 @@
         <canvas id="ecg" width="900" height="140" role="img" aria-label="Heartbeat monitor"></canvas>
         <span class="beacon" aria-hidden="true"></span>
       </div>
-      <p class="pulse" id="pulse">Pulse: 72 bpm <span>(click the monitor when it stops)</span></p>
+      <p class="pulse" id="pulse">Pulse: 42 bpm <span>(click the monitor when it stops)</span></p>
     </div>
   </section>
 
