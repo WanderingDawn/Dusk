@@ -15,6 +15,43 @@ const skills = [
 ];
 /* =================================== */
 
+// Dynamic background: the room changes with the section you are reading.
+const room = document.getElementById("room");
+const steel = room.querySelector(".s-steel");
+for (let i = 1; i <= 60; i++)   // wall of refrigerator doors; a few hang slightly ajar
+  steel.insertAdjacentHTML("beforeend", `<i class="door${Math.random() < .07 ? " ajar" : ""}"><b class="slot">${String(i).padStart(2, "0")}</b><b class="handle"></b></i>`);
+function setScene(name) {
+  if (room.dataset.scene === name) return;
+  room.dataset.scene = name;
+  room.classList.remove("flick"); void room.offsetWidth;
+  if (!reduce) room.classList.add("flick");   // the light stutters as the room changes
+}
+const sceneIO = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) setScene(e.target.dataset.scene); }),
+  { rootMargin: "-45% 0px -45% 0px" });
+document.querySelectorAll("[data-scene]").forEach(el => sceneIO.observe(el));
+
+// parallax: scene props drift with scroll position and the mouse
+let px = 0, par = false;
+function parallax() {
+  par = false;
+  if (scrollY + innerHeight >= document.documentElement.scrollHeight - 6) setScene("satin");   // short pages can't scroll the last section to the middle
+  const sec = document.querySelector(`section[data-scene="${room.dataset.scene}"]`);
+  if (sec) { const r = sec.getBoundingClientRect(); room.style.setProperty("--p", Math.max(-1, Math.min(1, (r.top + r.height / 2 - innerHeight / 2) / innerHeight)).toFixed(3)); }
+  room.style.setProperty("--mx", px.toFixed(3));
+}
+const queue = () => { if (!par) { par = true; requestAnimationFrame(parallax); } };
+addEventListener("scroll", queue, { passive: true });
+addEventListener("pointermove", e => { px = (e.clientX / innerWidth - .5) * 2; queue(); });
+// something knocks from inside a refrigerator door now and then
+(function knock() {
+  setTimeout(() => {
+    const ds = steel.children;
+    if (room.dataset.scene === "steel" && !reduce) { const d = ds[Math.floor(Math.random() * ds.length)]; d.classList.add("knock"); setTimeout(() => d.classList.remove("knock"), 700); }
+    knock();
+  }, 8000 + Math.random() * 12000);
+})();
+
+
 // Cold-storage drawers
 const cabinet = document.getElementById("cabinet");
 projects.forEach(p => {
@@ -219,6 +256,7 @@ function setState(a) {
   alive = a; born = performance.now();
   deadSince = a ? 0 : performance.now();
   renderPulse();
+  document.body.classList.toggle("flatline", !a);
   status.textContent = a ? "Alive. For now." : "Time of death: just now.";
 }
 penaltyBtn.addEventListener("click", () => {
