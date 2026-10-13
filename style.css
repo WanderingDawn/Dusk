@@ -12,10 +12,14 @@ a:hover{color:var(--blood-lit)}
 code{font-family:var(--type);color:var(--tag)}
 
 /* the room: cold, damp morgue wall of dingy ceramic tile, rust streaks, grime and drifting chill */
-#room{position:fixed;inset:0;z-index:-1;overflow:hidden;
-  background:
-    radial-gradient(ellipse at 50% 25%,transparent 35%,rgba(0,0,0,.8) 100%),
-    linear-gradient(0deg,rgba(0,0,0,.7),transparent 32%),
+#room{position:fixed;inset:0;z-index:-1;overflow:hidden;background:#0b0f0e}
+.scene{position:absolute;inset:0;opacity:0;transition:opacity 1s ease;overflow:hidden}
+#room[data-scene="wall"] .s-wall,#room[data-scene="report"] .s-report,#room[data-scene="steel"] .s-steel,
+#room[data-scene="chart"] .s-chart,#room[data-scene="satin"] .s-satin{opacity:1}
+.vig{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 25%,transparent 35%,rgba(0,0,0,.8) 100%),linear-gradient(0deg,rgba(0,0,0,.55),transparent 32%)}
+
+/* 1. hero: damp ceramic tile wall with rust streaks */
+.s-wall{background:
     linear-gradient(180deg,rgba(120,52,24,.26),transparent 55%) 9% 0/5px 55% no-repeat,
     linear-gradient(180deg,rgba(100,44,22,.2),transparent 40%) 27% 0/8px 40% no-repeat,
     linear-gradient(180deg,rgba(120,52,24,.3),transparent 62%) 46% 0/4px 62% no-repeat,
@@ -23,15 +27,64 @@ code{font-family:var(--type);color:var(--tag)}
     linear-gradient(180deg,rgba(120,52,24,.26),transparent 50%) 88% 0/5px 50% no-repeat,
     linear-gradient(135deg,rgba(210,230,220,.055) 0,transparent 45%) 0 0/96px 96px,
     linear-gradient(rgba(0,0,0,.6) 0 3px,transparent 3px) 0 0/96px 96px,
-    linear-gradient(90deg,rgba(0,0,0,.6) 0 3px,transparent 3px) 0 0/96px 96px,
-    #17201f}
-#room::after{content:"";position:absolute;inset:0;opacity:.35;mix-blend-mode:multiply;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .13 0 0 0 0 .12 0 0 0 1.4 -.35'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")}
+    linear-gradient(90deg,rgba(0,0,0,.6) 0 3px,transparent 3px) 0 0/96px 96px,#17201f}
+
+/* 2. autopsy report: a worn desk, a manila case folder and a ruled report page */
+.s-report{background:repeating-linear-gradient(90deg,rgba(0,0,0,.2) 0 2px,transparent 2px 11px),
+    repeating-linear-gradient(90deg,rgba(255,220,170,.025) 0 1px,transparent 1px 5px),#1b140f}
+.folder{position:absolute;left:50%;top:54%;width:min(1100px,98vw);height:min(600px,80vh);translate:calc(var(--mx,0)*-10px) calc(var(--p,0)*-24px);
+  transform:translate(-52%,-50%) rotate(-1.6deg);background:linear-gradient(160deg,#4a3d26,#33291a);border-radius:4px 8px 6px 6px;box-shadow:0 30px 70px rgba(0,0,0,.7)}
+.folder::before{content:"CASE FILE \2014  CONFIDENTIAL";position:absolute;left:36px;top:-32px;height:34px;padding:0 22px;
+  font:.8rem/34px var(--type);letter-spacing:.12em;color:rgba(20,12,4,.55);background:#4a3d26;border-radius:8px 8px 0 0}
+.paper{position:absolute;left:50%;top:54%;width:min(1000px,94vw);height:min(560px,76vh);translate:calc(var(--mx,0)*6px) calc(var(--p,0)*-40px);transform:translate(-50%,-50%) rotate(.7deg);
+  background:linear-gradient(90deg,transparent 64px,rgba(170,45,45,.3) 64px 66px,transparent 66px),
+    repeating-linear-gradient(180deg,transparent 0 35px,rgba(130,160,185,.2) 35px 36px),
+    linear-gradient(170deg,#4c4635,#38331f);
+  box-shadow:0 18px 50px rgba(0,0,0,.65)}
+.paper::before{content:"POST-MORTEM EXAMINATION";position:absolute;left:84px;top:22px;font:1.1rem var(--type);letter-spacing:.2em;color:rgba(15,10,5,.45)}
+.paper::after{content:"DECEASED";position:absolute;right:30px;bottom:34px;transform:rotate(-12deg);padding:.1em .5em;
+  font:2.4rem var(--type);letter-spacing:.1em;color:rgba(150,28,28,.4);border:3px solid rgba(150,28,28,.4)}
+.ring{translate:calc(var(--mx,0)*14px) calc(var(--p,0)*-60px);position:absolute;right:max(4vw,40px);top:18%;width:130px;height:130px;border-radius:50%;
+  border:7px solid rgba(110,64,28,.3);filter:blur(.6px);box-shadow:inset 0 0 12px rgba(110,64,28,.25)}
+
+/* 3. cold storage: a wall of steel refrigerator doors (generated in script.js) */
+.s-steel{inset:-40px;translate:calc(var(--mx,0)*-8px) calc(var(--p,0)*-30px);display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));grid-auto-rows:280px;gap:6px;padding:6px;background:#0a0d0e}
+.door{position:relative;background:repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 1px,transparent 1px 4px),linear-gradient(135deg,#2a3236,#171d20);
+  border:2px solid #0b0e0f;box-shadow:inset 0 0 0 2px rgba(255,255,255,.04),inset 0 -30px 40px rgba(0,0,0,.35);border-radius:3px}
+.door .slot{position:absolute;left:50%;top:26px;transform:translateX(-50%);width:100px;height:38px;display:grid;place-items:center;
+  font:.85rem var(--type);color:rgba(20,14,6,.65);background:rgba(205,189,141,.25);border:1px solid rgba(0,0,0,.6)}
+.door .handle{position:absolute;left:50%;bottom:70px;transform:translateX(-50%);width:110px;height:12px;border-radius:6px;
+  background:linear-gradient(#5b676c,#20282b);box-shadow:0 3px 5px rgba(0,0,0,.7)}
+.door.ajar::after{content:"";position:absolute;top:0;right:0;bottom:0;width:9px;background:linear-gradient(90deg,#000,rgba(170,205,200,.22))}
+
+/* 4. vital signs: ECG chart paper with a slowly crawling trace */
+.s-chart{background:
+    linear-gradient(rgba(150,60,60,.32) 1px,transparent 1px) 0 0/72px 72px,
+    linear-gradient(90deg,rgba(150,60,60,.32) 1px,transparent 1px) 0 0/72px 72px,
+    linear-gradient(rgba(150,60,60,.14) 1px,transparent 1px) 0 0/14.4px 14.4px,
+    linear-gradient(90deg,rgba(150,60,60,.14) 1px,transparent 1px) 0 0/14.4px 14.4px,#0d1413}
+.trace{position:absolute;left:0;right:0;top:68%;height:160px;opacity:.45;animation:crawl 16s linear infinite;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='160'%3E%3Cpath d='M0 90H70q8-10 16 0H130l6 8 8-62 8 80 6-26H220q14-18 28 0H400' fill='none' stroke='%2393a08f' stroke-width='2'/%3E%3C/svg%3E") 0 0/400px 160px repeat-x}
+@keyframes crawl{to{background-position:-400px 0}}
+
+/* 5. last words: tufted satin casket lining, with a guttering candle glow */
+.s-satin{background:
+    radial-gradient(circle at 0 0,#050102 0 4px,rgba(255,255,255,.1) 5px,transparent 7px) 0 0/80px 80px,
+    radial-gradient(circle at 50% 50%,#050102 0 4px,rgba(255,255,255,.1) 5px,transparent 7px) 0 0/80px 80px,
+    linear-gradient(45deg,transparent 47%,rgba(0,0,0,.55) 49% 51%,transparent 53%) 0 0/80px 80px,
+    linear-gradient(-45deg,transparent 47%,rgba(0,0,0,.55) 49% 51%,transparent 53%) 0 0/80px 80px,
+    radial-gradient(ellipse at 50% 15%,rgba(255,190,190,.09),transparent 60%),#240c10}
+.s-satin::after{content:"";position:absolute;inset:0;animation:candle 3.8s ease-in-out infinite alternate;
+  background:radial-gradient(ellipse 45% 40% at 50% 60%,rgba(255,170,90,.1),transparent 70%)}
+@keyframes candle{0%{opacity:.5}30%{opacity:1}45%{opacity:.65}70%{opacity:.95}100%{opacity:.6}}
+
 .fog{position:absolute;inset:-25%;opacity:.55;
   background:radial-gradient(ellipse 40% 25% at 25% 70%,rgba(170,200,190,.09),transparent 70%),
              radial-gradient(ellipse 45% 22% at 75% 55%,rgba(170,200,190,.07),transparent 70%),
              radial-gradient(ellipse 35% 20% at 50% 90%,rgba(170,200,190,.08),transparent 70%);
   animation:drift 38s ease-in-out infinite alternate}
+#room::after{content:"";position:absolute;inset:0;opacity:.35;mix-blend-mode:multiply;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .13 0 0 0 0 .12 0 0 0 1.4 -.35'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")}
 @keyframes drift{from{transform:translate3d(-6%,0,0)}to{transform:translate3d(6%,-3%,0)}}
 
 /* torch: darkness that follows the cursor */
@@ -73,12 +126,13 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:3px;z-index:6
   background:var(--pallor);box-shadow:0 0 30px 6px rgba(147,160,143,.4);animation:flick 7s infinite}
 @keyframes flick{0%,100%{opacity:1}41%{opacity:1}42%{opacity:.1}43%{opacity:1}45%{opacity:.2}46%{opacity:1}80%{opacity:.7}81%{opacity:1}}
 
-.bar{position:sticky;top:0;z-index:40;display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;justify-content:space-between;
-  align-items:center;padding:.9rem clamp(1rem,4vw,3rem);background:rgba(9,13,12,.92);border-bottom:1px solid var(--steel)}
+.bar{position:sticky;top:0;z-index:56;display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;justify-content:space-between;
+  align-items:center;padding:.9rem clamp(1rem,4vw,3rem);background:rgba(9,13,12,.97);border-bottom:1px solid var(--steel)}
 .mark{font-family:var(--type);text-decoration:none;color:var(--pallor)}
-nav{display:flex;flex-wrap:wrap;gap:.3rem 1.4rem;align-items:center;font-size:1rem}
+nav{margin-left:auto;display:flex;flex-wrap:wrap;gap:.3rem 1.4rem;align-items:center;font-size:1rem}
 nav a{text-decoration:none}
-.toggle{font:.9rem var(--type);background:none;color:var(--tag);border:1px solid var(--steel);padding:.2rem .7rem;cursor:pointer}
+.controls{position:fixed;right:1rem;bottom:1rem;z-index:59;display:flex;flex-wrap:wrap;gap:.5rem;justify-content:flex-end}
+.toggle{font:.9rem var(--type);background:rgba(9,13,12,.88);color:var(--tag);border:1px solid var(--steel);padding:.2rem .7rem;cursor:pointer}
 
 .hero{display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:clamp(2rem,6vw,5rem);align-items:center;
   min-height:88vh;padding:3rem clamp(1rem,4vw,3rem)}
@@ -101,7 +155,7 @@ nav a{text-decoration:none}
   box-shadow:0 0 36px 10px rgba(196,38,38,.26),inset 0 0 28px rgba(196,38,38,.18)}
 @keyframes breathe{0%,100%{opacity:.55}50%{opacity:1}}
 .pulse{font:.95rem var(--type);color:var(--pallor);margin-top:.6rem}
-.pulse span{color:var(--steel)}
+.pulse span{color:#5e6f6a}
 .pulse.dead{color:var(--blood-lit)}
 
 .wrap{max-width:980px;margin:0 auto;padding:6rem clamp(1rem,4vw,3rem) 2rem}
@@ -132,7 +186,22 @@ h2{font:400 clamp(2rem,5vw,3.2rem)/1.1 var(--serif);margin-bottom:1.5rem;color:v
 
 .big{font-size:clamp(1.4rem,3vw,2rem);line-height:1.4;max-width:30ch}
 .links{margin-top:1.5rem;display:flex;gap:1.5rem;font-family:var(--type)}
-footer{margin-top:7rem;padding:2rem;text-align:center;font:.9rem var(--type);color:var(--steel);border-top:1px solid var(--slab)}
+footer{margin-top:7rem;padding:2rem;text-align:center;font:.9rem var(--type);color:#55645f;border-top:1px solid var(--slab)}
 
 @media (max-width:760px){.hero{grid-template-columns:1fr;padding-top:7rem}.tag{max-width:320px;margin:0 auto}.vitals li{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*,body::before{animation:none!important;transition:none!important}}
+/* ---- background life ---- */
+.drip{position:absolute;top:-20px;width:4px;height:16px;border-radius:0 0 4px 4px;background:linear-gradient(rgba(170,200,190,0),rgba(170,200,190,.4));animation:drip 8s ease-in infinite}
+@keyframes drip{0%{transform:translateY(0);opacity:0}8%{opacity:1}75%{transform:translateY(105vh);opacity:1}100%{transform:translateY(105vh);opacity:0}}
+.door.knock{animation:knock .6s}
+@keyframes knock{0%,100%{translate:0}12%{translate:-3px 1px}24%{translate:3px 0}36%{translate:-2px -1px}50%{translate:2px 0}70%{translate:-1px 0}}
+.s-satin::before{content:"";position:absolute;inset:0;animation:dust 50s linear infinite;
+  background:radial-gradient(circle,rgba(255,220,200,.4) 0 1.5px,transparent 2px) 0 0/190px 230px,radial-gradient(circle,rgba(255,220,200,.25) 0 1px,transparent 1.6px) 60px 40px/310px 270px}
+@keyframes dust{to{background-position:-120px -460px,-200px -540px}}
+.s-chart::after{content:"";position:absolute;left:0;right:0;top:calc(68% + 90px);height:2px;background:rgba(196,38,38,.7);box-shadow:0 0 12px rgba(196,38,38,.6);opacity:0;transition:opacity .6s}
+body.flatline .s-chart::after{opacity:1}
+body.flatline .trace{opacity:0}
+.trace{transition:opacity .6s}
+#room.flick{animation:rflick .5s}
+@keyframes rflick{0%{opacity:1}15%{opacity:.25}30%{opacity:1}45%{opacity:.4}60%{opacity:1}}
+@media (max-width:760px){.bar{padding:.6rem 1rem}nav{gap:.2rem 1rem;font-size:.95rem}.controls{right:.6rem;bottom:.6rem}.toggle{font-size:.8rem;padding:.15rem .5rem}}
