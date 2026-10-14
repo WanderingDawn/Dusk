@@ -1,0 +1,104 @@
+:root{--bone:#ddd5bf;--steel:#2b3133;--tag:#cdbd8d;--blood:#8a1515;--type:"Special Elite","Courier New",monospace}
+*{box-sizing:border-box;margin:0}
+body{min-height:100vh;background:#0b0f0e;color:var(--bone);font:1rem/1.5 var(--type);overflow-x:hidden}
+a{color:var(--bone)} :focus-visible{outline:2px solid #c42626;outline-offset:3px}
+
+/* the room, seen from above: tiled floor, one overhead light, darkness at the edges */
+.room{position:relative;min-height:100vh;display:grid;place-items:start center;padding:21vh 0 6vh;
+  background:linear-gradient(135deg,rgba(210,230,220,.05) 0,transparent 45%) 0 0/110px 110px,
+    linear-gradient(rgba(0,0,0,.6) 0 3px,transparent 3px) 0 0/110px 110px,linear-gradient(90deg,rgba(0,0,0,.6) 0 3px,transparent 3px) 0 0/110px 110px,#17201f}
+
+.slab{position:relative;height:min(68vh,230vw);aspect-ratio:320/800;border-radius:18px;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 1px,transparent 1px 4px),linear-gradient(90deg,#1c2326,#3a454a 50%,#1c2326);
+  box-shadow:0 30px 90px #000,inset 0 0 0 6px #232b2e,inset 0 0 0 9px #0d1214;z-index:1}
+.layer{position:absolute;inset:0;width:100%;height:100%}
+.sheet{animation:breathe 5s ease-in-out infinite;transform-origin:50% 30%}
+@keyframes breathe{50%{transform:scale(1.006,1.003)}}
+.cap{pointer-events:none;touch-action:none}
+#cover:focus{outline:none}
+#cover:focus-visible{filter:drop-shadow(0 0 5px #c42626)}
+#cover{pointer-events:all;cursor:grab;transition:transform .7s cubic-bezier(.3,1.2,.4,1)}
+#cover:hover{filter:brightness(1.08)}
+.slab.dragging #cover{transition:none;cursor:grabbing}
+
+/* the face: an oval of photograph, feathered into the slab */
+.face{position:absolute;left:34%;top:3.6%;width:32%;height:16.4%;opacity:0;transition:opacity .15s;
+  -webkit-mask-image:radial-gradient(ellipse at 50% 50%,#000 48%,transparent 68%);mask-image:radial-gradient(ellipse at 50% 50%,#000 48%,transparent 68%)}
+.revealed .face{opacity:1;cursor:zoom-in}
+.face.glitch{transform:translateX(2px);filter:contrast(1.4) hue-rotate(20deg)}
+
+.tag{position:absolute;right:-.5rem;bottom:6%;transform:rotate(8deg);background:var(--tag);color:#1a160c;padding:.35rem .7rem;display:grid;font-size:.75rem;box-shadow:0 8px 16px rgba(0,0,0,.6);border-radius:3px 3px 12px 12px}
+.tag b{color:var(--blood)}
+.hint{position:fixed;left:0;right:0;bottom:3.6rem;text-align:center;color:#7d8d88;font-size:.9rem;z-index:3;text-shadow:0 0 6px #000}
+
+.ui{position:fixed;left:0;right:0;bottom:0;z-index:59;display:flex;flex-wrap:wrap;gap:.5rem 1rem;justify-content:center;align-items:center;padding:.7rem;background:linear-gradient(transparent,rgba(0,0,0,.85))}
+.btn{font:.85rem var(--type);color:var(--tag);background:rgba(9,13,12,.9);border:1px solid var(--steel);padding:.25rem .8rem;cursor:pointer}
+.ui a{font-size:.85rem}
+
+#view{position:fixed;inset:0;z-index:56;background:rgba(0,0,0,.94);display:grid;place-items:center;cursor:zoom-out}
+#view[hidden]{display:none}
+#big{max-width:94vw;max-height:92vh;box-shadow:0 0 80px #000}
+#flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:61}
+#flash.go{animation:flash .9s ease-out}
+@keyframes flash{0%{opacity:.95}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---- lights, shared with the portfolio ---- */
+/* the dark: lights off drops a near-black veil over the whole page (JS drives --dk, 0 to 1) */
+#dark{position:fixed;inset:0;z-index:50;pointer-events:none;background:#000;opacity:var(--dk,0)}
+
+/* hanging lamp: drops in with the torch off, then switches on; switches off, then gets hauled back up */
+#lamp{position:fixed;top:0;left:50%;width:120px;margin-left:-60px;z-index:52;pointer-events:none;
+  transform:translateY(-130%);transition:transform .9s cubic-bezier(.6,0,.9,.5)}
+#lamp.down{transform:none;transition-duration:1s;transition-timing-function:cubic-bezier(.3,1.45,.5,1)}
+.lamp-swing{position:relative;height:190px;transform-origin:50% 0}
+#lamp.down .lamp-swing{animation:lswing 2.6s ease-out .6s both}
+.cone,.halo,.inner,.fil{opacity:0;transition:opacity .08s}
+.bulb{fill:#262d30;stroke:#3a444a;stroke-width:.8}
+#lamp.on .cone,#lamp.on .halo,#lamp.on .inner{opacity:var(--lit,1)}
+#lamp.on .fil{opacity:var(--lit,1)}
+#lamp.on .bulb{fill:url(#bulbG);stroke:none;opacity:var(--lit,1)}
+@keyframes lswing{0%{transform:rotate(7deg)}20%{transform:rotate(-5deg)}40%{transform:rotate(3.5deg)}60%{transform:rotate(-2deg)}80%{transform:rotate(1deg)}100%{transform:rotate(0)}}
+/* flickering strip light */
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:3px;z-index:60;
+  background:var(--pallor);box-shadow:0 0 30px 6px rgba(147,160,143,.4);animation:flick 7s infinite}
+@keyframes flick{0%,100%{opacity:1}41%{opacity:1}42%{opacity:.1}43%{opacity:1}45%{opacity:.2}46%{opacity:1}80%{opacity:.7}81%{opacity:1}}
+@media (max-width:760px){#lamp{display:none}.room{place-items:center;padding:3vh 0 6vh}.slab{height:min(78vh,230vw)}}
+
+/* soft vignette so the room is not flat with the light on */
+.room::after{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 72% at 50% 45%,transparent 40%,rgba(0,0,0,.75))}
+
+/* ---- very dim glowing lights, only found in the dark ---- */
+#glow{position:fixed;inset:0;z-index:51;pointer-events:none}
+.led{position:fixed;left:0;top:0;opacity:0;border-radius:50%;pointer-events:none;transition:opacity .5s;
+  background:rgba(var(--c),.85);box-shadow:0 0 9px 3px rgba(var(--c),.3)}
+.led.exit{border-radius:2px;display:grid;place-items:center;font:600 7px var(--type);letter-spacing:.12em;color:#04230f}
+.led.blob{background:rgba(var(--c),.3);box-shadow:none;filter:blur(10px)}
+.led.blink{animation:ledblink 3s steps(1) infinite}
+.led.flame{animation:flame .45s ease-in-out infinite alternate;border-radius:50% 50% 50% 50%/65% 65% 35% 35%}
+@keyframes ledblink{0%,88%{filter:brightness(1)}89%,100%{filter:brightness(.08)}}
+@keyframes flame{from{scale:1 .88}to{scale:.9 1.1}}
+
+/* ---- hallucinations (after 5s of darkness) ---- */
+#halluc{position:fixed;inset:0;z-index:53;pointer-events:none;overflow:hidden}
+#halluc::before{content:"";position:absolute;inset:0;opacity:0;transition:opacity 2s;background:radial-gradient(ellipse at 50% 50%,transparent 45%,rgba(130,0,0,.55))}
+#halluc.on::before{opacity:calc(.12 + var(--hi,0) * .8);animation:throb 1.3s ease-in-out infinite}
+@keyframes throb{50%{transform:scale(1.07)}}
+.eyes{position:absolute;display:flex;gap:calc(15px * var(--sc,1));opacity:0;animation:eyes 4.2s ease-in-out forwards}
+.eyes b{width:calc(10px * var(--sc,1));height:calc(5px * var(--sc,1));border-radius:50%;background:#e6f0df;box-shadow:0 0 12px 3px rgba(230,240,223,.35)}
+@keyframes eyes{0%{opacity:0}15%,44%{opacity:var(--a,.4);scale:1 1}49%{scale:1 .1}54%,85%{opacity:var(--a,.4);scale:1 1}100%{opacity:0}}
+.word{position:absolute;white-space:nowrap;opacity:0;font:1.1rem var(--type);letter-spacing:.15em;color:#a89c85;text-shadow:0 0 8px rgba(130,0,0,.7);animation:word 3.2s steps(1) forwards}
+@keyframes word{0%{opacity:0}10%{opacity:var(--a,.3)}18%{opacity:0}26%,70%{opacity:var(--a,.3)}76%{opacity:0}80%{opacity:var(--a,.3)}100%{opacity:0}}
+.peek{position:absolute;width:120px;height:160px;opacity:0;border-radius:50% 50% 45% 45%;animation:peek 2.6s ease-in-out forwards;
+  background:radial-gradient(ellipse 13px 8px at 32% 42%,#000 60%,transparent 64%),radial-gradient(ellipse 13px 8px at 68% 42%,#000 60%,transparent 64%),
+    radial-gradient(ellipse 22px 9px at 50% 76%,#000 55%,transparent 62%),radial-gradient(ellipse at 50% 40%,#9aa39b,#3d4642 72%)}
+@keyframes peek{0%{opacity:0;translate:0}25%,70%{opacity:calc(.1 + var(--hi,0) * .28);translate:calc(var(--d,1) * 58px) 0}100%{opacity:0;translate:0}}
+.figure{position:absolute;left:84%;bottom:2%;width:60px;height:190px;scale:var(--s,.6);transform-origin:50% 100%;transition:scale 3s;
+  opacity:calc(.3 + var(--hi,0) * .5);background:linear-gradient(rgba(150,165,158,.2),rgba(150,165,158,.05));border-radius:45% 45% 8% 8%/18% 18% 3% 3%}
+.figure::before{content:"";position:absolute;left:50%;top:-36px;width:34px;height:40px;margin-left:-17px;border-radius:50%;background:rgba(150,165,158,.2)}
+.figure::after{content:"";position:absolute;left:50%;top:-24px;width:24px;height:4px;margin-left:-12px;opacity:calc(var(--hi,0) * 1.4 - .4);
+  background:radial-gradient(circle at 22% 50%,#e8f0e2 0 2px,transparent 3px),radial-gradient(circle at 78% 50%,#e8f0e2 0 2px,transparent 3px)}
+
+/* the sheet breathes harder while you hallucinate */
+.haunted .sheet{animation:breathe2 1.8s ease-in-out infinite}
+@keyframes breathe2{50%{transform:scale(1.025,1.012)}}

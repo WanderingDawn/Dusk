@@ -9,9 +9,17 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="room" aria-hidden="true"><span class="fog"></span></div>
+<div id="room" aria-hidden="true" data-scene="wall">
+  <span class="scene s-wall"><i class="drip" style="left:14%"></i><i class="drip" style="left:47%;animation-delay:-3s"></i><i class="drip" style="left:81%;animation-delay:-5.5s"></i></span>
+  <span class="scene s-report"><i class="folder"></i><i class="paper"></i><i class="ring"></i></span>
+  <span class="scene s-steel"></span>
+  <span class="scene s-chart"><i class="trace"></i></span>
+  <span class="scene s-satin"></span>
+  <span class="fog"></span><span class="vig"></span>
+</div>
 <div id="dark" aria-hidden="true"></div>
-<div id="beam" aria-hidden="true"></div>
+<div id="glow" aria-hidden="true"></div>
+<div id="halluc" aria-hidden="true"></div>
 <div id="lamp" aria-hidden="true"><div class="lamp-swing">
 <svg viewBox="0 0 120 190" width="120" height="190" style="overflow:visible">
   <defs>
@@ -43,14 +51,18 @@
     <a href="#drawers">Cold storage</a>
     <a href="#vitals">Vitals</a>
     <a href="#last-words">Last words</a>
-    <button id="lights" class="toggle" aria-pressed="true">Torch: on</button>
-    <button id="penalty" class="toggle" aria-pressed="true">Penalty: on</button>
-    <button id="sound" class="toggle" aria-pressed="true">Sound: on</button>
+    <a href="viewing-room/index.html">Viewing room</a>
   </nav>
 </header>
 
+<div class="controls">
+    <button id="lights" class="toggle" aria-pressed="true">Light: on</button>
+    <button id="penalty" class="toggle" aria-pressed="true">Penalty: on</button>
+    <button id="sound" class="toggle" aria-pressed="true">Sound: on</button>
+</div>
+
 <main id="top">
-  <section class="hero">
+  <section class="hero" data-scene="wall">
     <div class="tag" aria-label="Toe tag">
       <span class="hole"></span>
       <p class="tag-k">Name</p><h1>Kent Bryan A. Palarao</h1>
@@ -67,32 +79,33 @@
     </div>
   </section>
 
-  <section id="report" class="wrap">
+  <section id="report" class="wrap" data-scene="report">
     <h2>Autopsy report</h2>
     <div class="cols">
       <p>I am an Immersion student with some experience building things people use and, occasionally, things people fear. I treat every project like a body on the table: study it, open it carefully, and find out what actually kept it alive.</p>
       <p>Cause of obsession: Human's sudden change in emotion.<br> Time of arrival: undetermined. <br>Currently residing in Iligan City.</p>
+    </div>
   </section>
 
-  <section id="drawers" class="wrap">
+  <section id="drawers" class="wrap" data-scene="steel">
     <h2>Cold storage</h2>
     <p class="sub">Selected works, filed by case. Pull a drawer to open it.</p>
     <div id="cabinet"></div>
   </section>
 
-  <section id="vitals" class="wrap">
+  <section id="vitals" class="wrap" data-scene="chart">
     <h2>Vital signs</h2>
     <ul class="vitals" id="skills"></ul>
   </section>
 
-  <section id="last-words" class="wrap">
+  <section id="last-words" class="wrap" data-scene="satin">
     <h2>Last words</h2>
     <p class="big">If you are reading this, you have already opened the door. <a href="mailto:bryanpalarao57@Gmail.com">bryanpalarao57@Gmail.com</a></p>
     <p class="links"><a href="https://github.com/WanderingDawn">GitHub</a></p>
   </section>
 </main>
 
-<footer>Born 2008. Buried under deadlines. &copy; <span id="yr"></span> Kent Bryan A. Palarao.</footer>
+<footer data-scene="satin">Born 2008. Buried under deadlines. &copy; <span id="yr"></span> Kent Bryan A. Palarao.</footer>
 <script src="script.js"></script>
 </body>
 </html>
