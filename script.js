@@ -229,7 +229,7 @@ soundBtn.addEventListener("click", () => {
 // The buzz follows the light: it fades in/out smoothly and cuts out with every flicker.
 let lastA = performance.now();
 (function audioLoop(now) {
-  const dt = now - lastA; lastA = now;
+  const dt = Math.max(0, now - lastA); lastA = now;
   buzzEnv = buzzWanted ? Math.min(1, buzzEnv + dt / 200) : Math.max(0, buzzEnv - dt / 250);
   sfx.buzz.volume = BUZZ_VOL * buzzEnv * (1 - .9 * Math.min(1, flickLevel(now)));
   // whispers: silent until the hallucinations start, then louder and louder; gone the moment the light is back
@@ -241,7 +241,7 @@ let lastA = performance.now();
   // heartbeat after a revive: starts at full volume, fades out over its length
   if (hbStart) {
     const k = (now - hbStart) / ((sfx.heart.duration || 7.3) * 1000);
-    if (k >= 1) { sfx.heart.pause(); hbStart = 0; } else sfx.heart.volume = Math.max(0, 1 - k);
+    if (k >= 1) { sfx.heart.pause(); hbStart = 0; } else sfx.heart.volume = Math.min(1, Math.max(0, 1 - k));
   }
   if (!buzzWanted && buzzEnv === 0 && !sfx.buzz.paused) { sfx.buzz.pause(); sfx.buzz.currentTime = 0; }
   requestAnimationFrame(audioLoop);
@@ -301,22 +301,41 @@ function updateGlows(v) {                                       // v: how dark i
   });
 }
 
-// ===== Hallucinations: after 5 s without light the room starts showing you things, and the whispers swell =====
-const HALLUC_AFTER = 5000;    // ms of darkness before it starts
+// ===== Hallucinations: after 4 s without light (or once the dark is total) the room starts talking to you, and the whispers swell =====
+const HALLUC_AFTER = 4000;    // ms after the light goes out before it starts
 const HALLUC_RAMP = 40000;    // ms after that until it is at its worst
 const WHISPER_MAX = 1;        // whisper volume at its worst (0 to 1)
-const hallucActive = now => !lampLit && darkSince > 0 && now - darkSince > HALLUC_AFTER;
-const intensity = now => hallucActive(now) ? Math.min(1, (now - darkSince - HALLUC_AFTER) / HALLUC_RAMP) : 0;
-const halluc = document.getElementById("halluc");
-const WORDS = ["behind you", "turn on the light", "it's still breathing", "you were not alone", "don't look", "listen", "he moved", "TURN AROUND", "so cold", "help me"];
+// It starts when the light has been out for 4 s, OR the moment the penalty darkness has fully closed in on a flat pulse.
+function hallucStart() {
+  const a = (!lampLit && darkSince > 0) ? darkSince + HALLUC_AFTER : Infinity;
+  const b = (penaltyOn && !alive) ? deadSince + GRACE + RAMP : Infinity;     // = the moment the dark is total
+  return Math.min(a, b);
+}
+const hallucActive = now => hallucStart() <= now;
+const intensity = now => hallucActive(now) ? Math.min(1, (now - hallucStart()) / HALLUC_RAMP) : 0;
+// the voices want you to stop: stop reviving, stop fighting, leave it dark
+const LINES = ["stop fighting it", "rest now", "let it go", "the dark is kind", "you've done enough", "stay with us", "it's quiet here", "just close your eyes", "come closer"];
+const DARK_LINES = ["leave it dark", "you don't need the light", "stay in the dark"];
+const PULSE_LINES = ["let it stay flat", "stop reviving it", "let it rest", "you don't have to keep it going", "one less thing to hold"];
+function pickLine() { return pick(LINES.concat(lampLit ? [] : DARK_LINES, alive ? [] : PULSE_LINES, alive ? [] : PULSE_LINES)); }
 const rnd = (a, b) => a + Math.random() * (b - a);
+const pick = arr => arr[Math.random() * arr.length | 0];
 let nextSpawn = 0, figure = null;
 function spawn(i) {
   if (halluc.children.length > 7) return;
-  const el = document.createElement("i"), r = Math.random();
-  if (r < .45) { el.className = "eyes"; el.innerHTML = "<b></b><b></b>"; el.style.cssText = `left:${rnd(5, 92)}%;top:${rnd(10, 85)}%;--a:${(.2 + .4 * i).toFixed(2)};--sc:${rnd(.7, 1.8).toFixed(2)}`; }
-  else if (r < .8) { el.className = "word"; el.textContent = WORDS[Math.random() * WORDS.length | 0]; el.style.cssText = `left:${rnd(4, 70)}%;top:${rnd(12, 85)}%;--a:${(.16 + .3 * i).toFixed(2)};rotate:${rnd(-7, 7).toFixed(1)}deg`; }
-  else { const left = Math.random() < .5; el.className = "peek"; el.style.cssText = `${left ? "left" : "right"}:-70px;top:${rnd(15, 65)}%;--d:${left ? 1 : -1}`; }
+  const el = document.createElement("i");
+  if (Math.random() < .62) {              // a whispered invitation to stop trying
+    el.className = "word"; el.textContent = pickLine();
+    let x = rnd(4, 68) + "%", y = rnd(12, 85) + "%";
+    if (!alive) {                          // with a flat pulse, the voices gather around the monitor
+      const m = document.querySelector(".monitor").getBoundingClientRect();
+      if (m.bottom > 40 && m.top < innerHeight - 40 && Math.random() < .6) { x = (m.left + rnd(0, m.width * .55)).toFixed(0) + "px"; y = (m.top - rnd(14, 44)).toFixed(0) + "px"; }
+    }
+    el.style.cssText = `left:${x};top:${y};--a:${(.28 + .45 * i).toFixed(2)}`;
+  } else {                                // a warm light that drifts toward the middle: somewhere safe to go
+    const fromLeft = Math.random() < .5;
+    el.className = "lure"; el.style.cssText = `left:${fromLeft ? 4 : 92}%;top:${rnd(20, 75)}%;--tx:${fromLeft ? 38 : -38}vw;--ty:${rnd(-8, 8).toFixed(1)}vh;--a:${(.25 + .35 * i).toFixed(2)}`;
+  }
   el.addEventListener("animationend", () => el.remove());
   halluc.appendChild(el);
 }
@@ -326,13 +345,13 @@ function hallucTick(now) {
   halluc.style.setProperty("--hi", i.toFixed(3));
   if (active) {
     if (i > .2 && !figure) { figure = document.createElement("i"); figure.className = "figure"; halluc.appendChild(figure); }
-    if (figure) figure.style.setProperty("--s", (.6 + .9 * i).toFixed(2));        // it creeps closer
+    if (figure) figure.style.setProperty("--s", (.6 + .9 * i).toFixed(2));          // it stands a little closer each time you look
     if (now > nextSpawn) {
       spawn(i);
-      if (figure && Math.random() < .3) figure.style.left = (Math.random() < .5 ? 5 : 84) + "%";   // and it is never where you left it
+      if (figure && Math.random() < .3) figure.style.left = (Math.random() < .5 ? 5 : 84) + "%";
       nextSpawn = now + (3200 - 2400 * i) * rnd(.6, 1.4);
     }
-  } else if (halluc.firstChild) { halluc.replaceChildren(); figure = null; nextSpawn = 0; }   // the light kills them instantly
+  } else if (halluc.firstChild) { halluc.replaceChildren(); figure = null; nextSpawn = 0; }     // the light chases them off
 }
 function renderPulse() {
   pulse.classList.toggle("dead", !alive);

@@ -176,20 +176,30 @@ if (!reduce) (function schedule() {
   setTimeout(() => { if (!(lampLit && !sfx.buzz.paused)) startFlicker(); schedule(); }, 10000 + Math.random() * 5000);
 })();
 
-// ---------- hallucinations: after 5 s without light the room starts showing you things, and the whispers swell ----------
-const HALLUC_AFTER = 5000;    // ms of darkness before it starts
+// ---------- hallucinations: after 4 s without light the room starts talking to you, and the whispers swell ----------
+const HALLUC_AFTER = 4000;    // ms after the light goes out before it starts
 const HALLUC_RAMP = 40000;    // ms after that until it is at its worst
 const hallucActive = now => !lampLit && darkSince > 0 && now - darkSince > HALLUC_AFTER;
 const intensity = now => hallucActive(now) ? Math.min(1, (now - darkSince - HALLUC_AFTER) / HALLUC_RAMP) : 0;
-const WORDS = ["behind you", "turn on the light", "it's still breathing", "you were not alone", "don't look", "listen", "he moved", "TURN AROUND", "so cold", "help me"];
+// the voices want you to stop: stop fighting, stay, leave it dark
+const LINES = ["stop fighting it", "rest now", "let it go", "the dark is kind", "you've done enough", "stay with us", "it's quiet here", "just close your eyes",
+  "leave it dark", "you don't need the light", "it's quiet under the sheet", "stay a while"];
+const pickLine = () => pick(LINES);
 const rnd = (a, b) => a + Math.random() * (b - a);
+const pick = arr => arr[Math.random() * arr.length | 0];
 let nextSpawn = 0, figure = null;
 function spawn(i) {
   if (halluc.children.length > 7) return;
-  const el = document.createElement("i"), r = Math.random();
-  if (r < .45) { el.className = "eyes"; el.innerHTML = "<b></b><b></b>"; el.style.cssText = `left:${rnd(5, 92)}%;top:${rnd(10, 85)}%;--a:${(.2 + .4 * i).toFixed(2)};--sc:${rnd(.7, 1.8).toFixed(2)}`; }
-  else if (r < .8) { el.className = "word"; el.textContent = WORDS[Math.random() * WORDS.length | 0]; el.style.cssText = `left:${rnd(4, 70)}%;top:${rnd(12, 85)}%;--a:${(.16 + .3 * i).toFixed(2)};rotate:${rnd(-7, 7).toFixed(1)}deg`; }
-  else { const left = Math.random() < .5; el.className = "peek"; el.style.cssText = `${left ? "left" : "right"}:-70px;top:${rnd(15, 65)}%;--d:${left ? 1 : -1}`; }
+  const el = document.createElement("i");
+  if (Math.random() < .62) {              // a whispered invitation to stop trying
+    el.className = "word"; el.textContent = pickLine();
+    let x = rnd(4, 68) + "%", y = rnd(12, 85) + "%";
+    
+    el.style.cssText = `left:${x};top:${y};--a:${(.28 + .45 * i).toFixed(2)}`;
+  } else {                                // a warm light that drifts toward the middle: somewhere safe to go
+    const fromLeft = Math.random() < .5;
+    el.className = "lure"; el.style.cssText = `left:${fromLeft ? 4 : 92}%;top:${rnd(20, 75)}%;--tx:${fromLeft ? 38 : -38}vw;--ty:${rnd(-8, 8).toFixed(1)}vh;--a:${(.25 + .35 * i).toFixed(2)}`;
+  }
   el.addEventListener("animationend", () => el.remove());
   halluc.appendChild(el);
 }
@@ -199,13 +209,13 @@ function hallucTick(now) {
   halluc.style.setProperty("--hi", i.toFixed(3));
   if (active) {
     if (i > .2 && !figure) { figure = document.createElement("i"); figure.className = "figure"; halluc.appendChild(figure); }
-    if (figure) figure.style.setProperty("--s", (.6 + .9 * i).toFixed(2));          // it creeps closer
+    if (figure) figure.style.setProperty("--s", (.6 + .9 * i).toFixed(2));          // it stands a little closer each time you look
     if (now > nextSpawn) {
       spawn(i);
-      if (figure && Math.random() < .3) figure.style.left = (Math.random() < .5 ? 5 : 84) + "%";   // and it is never where you left it
+      if (figure && Math.random() < .3) figure.style.left = (Math.random() < .5 ? 5 : 84) + "%";
       nextSpawn = now + (3200 - 2400 * i) * rnd(.6, 1.4);
     }
-  } else if (halluc.firstChild) { halluc.replaceChildren(); figure = null; nextSpawn = 0; }     // the light kills them instantly
+  } else if (halluc.firstChild) { halluc.replaceChildren(); figure = null; nextSpawn = 0; }     // the light chases them off
 }
 
 // ---------- dim glowing lights: something to find in the dark ----------
