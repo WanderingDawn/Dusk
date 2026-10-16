@@ -1,86 +1,130 @@
-/* ===== EDIT HERE: your photos (put them in the images folder) ===== */
-const FACES = ["images/face1.jpg", "images/face2.jpg", "images/face3.jpg"];
+/* ===== EDIT HERE ===== */
+const PHOTO = "images/face1.jpg";          // the photo for the case file (it is shown with a grainy "leaked photo" filter). Missing = a placeholder is shown instead.
 const WATERMARK = "UNVERIFIED";            // small text in the corner of the "leaked" photo
-const STAMP = "03.14.2009  02:47";         // camera date stamp
-/* ================================================================== */
+const STAMP = "03.14.2009  02:47";         // camera date stamp on the photo
+const CASE = {                             // what the case file says
+  title: "UNIDENTIFIED MALE",
+  no: "2009-0314-07",
+  rows: [
+    ["Estimated age", "34 (\u00B1 4 years)"], ["Sex", "Male"], ["Height / weight", "178 cm / 71 kg"], ["Hair / eyes", "Dark brown / closed"],
+    ["Recovered", "14 March 2009, 02:47"], ["Location", "Riverbank, below the north bridge"], ["Time since death", "36\u201348 hours (est.)"],
+    ["Cause of death", "Pending examination"], ["Marks", "Healed fracture, left wrist. No tattoos."], ["Effects", "None recovered"]
+  ],
+  notes: "Rigor does not match the estimate. He was still warm when we brought him in. Please don't leave the room dark."
+};
+/* ====================== */
 const $ = id => document.getElementById(id);
-const slab = $("slab"), cover = $("cover"), face = $("face"), fctx = face.getContext("2d"), hint = $("hint");
-let photos = [], cur = 0, filterOn = true, revealed = false, drag = null, last = null;
+const slab = $("slab"), cover = $("cover"), face = $("face"), hint = $("hint");
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let revealed = false, drag = null;
 
-// ---------- photos ----------
+// ===== Opening: a cold-room door swings open, then you walk through it =====
+const intro = $("intro");
+let introPending = !!intro && !reduce;
+function openIntro() {
+  if (!introPending || intro.classList.contains("go")) return;
+  intro.classList.add("go");
+  playDoor();
+  setTimeout(() => intro.classList.add("through"), 2100);
+  setTimeout(() => { intro.remove(); introPending = false; document.body.classList.remove("introing"); if (!lampLit) darkSince = performance.now(); }, 3500);
+}
+if (intro && reduce) intro.remove();
+if (introPending) {
+  document.body.classList.add("introing");
+  intro.addEventListener("click", openIntro);
+  addEventListener("keydown", e => { if (introPending && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openIntro(); } });
+  setTimeout(openIntro, 4500);
+}
+
+// ===== the photo =====
 const loadImg = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
-function placeholder() {               // used until you add real photos
+function placeholder() {                   // a stand-in face: used for the mosaic when there is no photo yet
   const c = document.createElement("canvas"); c.width = 600; c.height = 800; const x = c.getContext("2d");
   x.fillStyle = "#222a29"; x.fillRect(0, 0, 600, 800);
-  x.fillStyle = "#2b3333"; x.beginPath(); x.ellipse(300, 860, 300, 190, 0, 0, 7); x.fill();
   const g = x.createRadialGradient(270, 330, 40, 300, 380, 260); g.addColorStop(0, "#d4cdbd"); g.addColorStop(1, "#8f8a7c");
   x.fillStyle = g; x.beginPath(); x.ellipse(300, 390, 170, 230, 0, 0, 7); x.fill();
   x.fillStyle = "#17120f"; x.beginPath(); x.ellipse(300, 230, 178, 118, 0, Math.PI, 0); x.fill();
-  x.strokeStyle = "#3b332c"; x.lineWidth = 7; x.lineCap = "round";
-  [[215, 385, 275, 390], [325, 390, 385, 385]].forEach(([a, b, c2, d]) => { x.beginPath(); x.moveTo(a, b); x.quadraticCurveTo((a + c2) / 2, b + 14, c2, d); x.stroke(); });
-  x.strokeStyle = "rgba(60,50,60,.55)"; x.lineWidth = 16; [[245, 408], [355, 408]].forEach(([a, b]) => { x.beginPath(); x.moveTo(a - 28, b); x.lineTo(a + 28, b); x.stroke(); });
-  x.strokeStyle = "#7a6f68"; x.lineWidth = 5; x.beginPath(); x.moveTo(300, 400); x.lineTo(292, 470); x.lineTo(310, 474); x.stroke();
-  x.strokeStyle = "#6b5557"; x.lineWidth = 6; x.beginPath(); x.moveTo(258, 540); x.quadraticCurveTo(300, 548, 342, 540); x.stroke();
+  x.strokeStyle = "#3b332c"; x.lineWidth = 9; x.lineCap = "round";
+  [[215, 395, 275, 395], [325, 395, 385, 395], [262, 545, 338, 545]].forEach(([a, b, c2, d]) => { x.beginPath(); x.moveTo(a, b); x.lineTo(c2, d); x.stroke(); });
   return c;
 }
-
-// ---------- the "leaked photo" look ----------
-// low-res capture -> washed-out harsh flash -> grain -> brutal JPEG recompression -> date stamp
+let photo = null;
+function cropOf(src, ratio) {              // centred, leaning towards the top (where faces are)
+  const cw = Math.min(src.width, src.height * ratio), ch = cw / ratio;
+  return [(src.width - cw) / 2, (src.height - ch) * .25, cw, ch];
+}
+const zoomIn = ([x, y, w, h], z) => [x + w * (1 - z) / 2, y + h * (1 - z) * .4, w * z, h * z];   // closer on the face
+function drawMosaic(src) {                 // an extreme mosaic: 9 x 12 blocks, drained of colour to sit in the lamp's cold light
+  const W = 9, H = 12, mid = document.createElement("canvas"); mid.width = W * 4; mid.height = H * 4;
+  const m = mid.getContext("2d"); m.imageSmoothingQuality = "high"; m.drawImage(src, ...zoomIn(cropOf(src, W / H), .7), 0, 0, mid.width, mid.height);
+  const x = face.getContext("2d"); x.imageSmoothingQuality = "high"; x.drawImage(mid, 0, 0, W, H);
+  // (only canvas blending below, never reading pixels back: browsers refuse that for images opened straight from disk)
+  x.globalCompositeOperation = "saturation"; x.fillStyle = "#777"; x.globalAlpha = .8; x.fillRect(0, 0, W, H);
+  x.globalCompositeOperation = "multiply"; x.fillStyle = "#9fb0b8"; x.globalAlpha = .45; x.fillRect(0, 0, W, H);
+  x.globalCompositeOperation = "source-over"; x.globalAlpha = 1;
+}
+// the "leaked photo" look: low-res capture -> harsh flash -> drained colour -> grain -> heavy JPEG -> date stamp
+// (built from canvas blending only, so it also works for a photo opened straight from disk)
 function leak(img) {
   const W = 420, H = 560, c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d");
-  const s = Math.max(W / img.width, H / img.height), sw = W / s, sh = H / s, sx = (img.width - sw) / 2, sy = (img.height - sh) * .3;
-  if (!filterOn) { x.drawImage(img, sx, sy, sw, sh, 0, 0, W, H); return Promise.resolve(c); }
+  const [sx, sy, sw, sh] = cropOf(img, W / H);
   const lo = document.createElement("canvas"); lo.width = 150; lo.height = 200; lo.getContext("2d").drawImage(img, sx, sy, sw, sh, 0, 0, 150, 200);
-  x.drawImage(lo, 0, 0, W, H);
-  const d = x.getImageData(0, 0, W, H), p = d.data, src = new Uint8ClampedArray(p);
-  for (let y = 0; y < H; y++) for (let i = 0; i < W; i++) {
-    const k = (y * W + i) * 4;
-    let r = src[i > 1 ? k - 8 : k], g = src[k + 1], b = src[i < W - 2 ? k + 10 : k + 2];          // colour fringing
-    const l = .3 * r + .59 * g + .11 * b;
-    r = l + (r - l) * .35; g = l + (g - l) * .35; b = l + (b - l) * .35;                           // drained colour
-    const dx = i / W - .5, dy = y / H - .42, q = dx * dx + dy * dy;
-    const f = Math.exp(-q * 7) * 50 - q * 190 + (Math.random() - .5) * 34 - (y & 1 ? 9 : 0);     // flash hotspot, vignette, grain, scanlines
-    p[k] = (r - 128) * 1.45 + 128 + f + 8; p[k + 1] = (g - 128) * 1.45 + 128 + f + 4; p[k + 2] = (b - 128) * 1.45 + 128 + f - 10;
-  }
-  x.putImageData(d, 0, 0);
+  x.drawImage(lo, 0, 0, W, H);                                                                        // low-res capture, blown up
+  x.globalCompositeOperation = "saturation"; x.fillStyle = "#808080"; x.globalAlpha = .66; x.fillRect(0, 0, W, H);   // drained colour
+  x.globalCompositeOperation = "overlay"; x.globalAlpha = .75; x.drawImage(lo, 0, 0, W, H);           // harsh contrast
+  x.globalCompositeOperation = "screen"; x.globalAlpha = 1;
+  let g = x.createRadialGradient(W * .5, H * .42, 10, W * .5, H * .42, W * .6); g.addColorStop(0, "rgba(255,246,220,.42)"); g.addColorStop(1, "rgba(255,246,220,0)");
+  x.fillStyle = g; x.fillRect(0, 0, W, H);                                                            // flash hotspot
+  x.globalCompositeOperation = "multiply";
+  g = x.createRadialGradient(W * .5, H * .45, H * .2, W * .5, H * .5, H * .72); g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(1, "rgba(0,0,0,.75)");
+  x.fillStyle = g; x.fillRect(0, 0, W, H);                                                            // dark corners
+  x.fillStyle = "rgba(215,225,190,1)"; x.globalAlpha = .22; x.fillRect(0, 0, W, H);                  // sickly cast
+  const n = document.createElement("canvas"); n.width = W / 2; n.height = H / 2; const nx = n.getContext("2d"), nd = nx.createImageData(n.width, n.height);
+  for (let i = 0; i < nd.data.length; i += 4) { const v = Math.random() * 255; nd.data[i] = nd.data[i + 1] = nd.data[i + 2] = v; nd.data[i + 3] = 255; }
+  nx.putImageData(nd, 0, 0);
+  x.globalCompositeOperation = "overlay"; x.globalAlpha = .55; x.drawImage(n, 0, 0, W, H);            // grain
+  x.globalCompositeOperation = "source-over"; x.globalAlpha = 1; x.fillStyle = "rgba(0,0,0,.09)";
+  for (let y = 0; y < H; y += 2) x.fillRect(0, y, W, 1);                                              // scanlines
   return new Promise(res => {
-    const j = new Image();
-    j.onload = () => {
-      x.drawImage(j, 0, 0);
+    const stamp = () => {
+      x.globalCompositeOperation = "source-over"; x.globalAlpha = 1;
       x.font = "bold 16px 'Courier New',monospace"; x.shadowColor = "#000"; x.shadowBlur = 3;
       x.fillStyle = "#ffa733"; x.textAlign = "right"; x.fillText(STAMP, W - 10, H - 12);
       x.fillStyle = "rgba(255,255,255,.55)"; x.textAlign = "left"; x.font = "13px 'Courier New',monospace"; x.fillText(WATERMARK, 10, H - 12);
       res(c);
     };
-    j.src = c.toDataURL("image/jpeg", .13);
+    let url; try { url = c.toDataURL("image/jpeg", .13); } catch (e) { return stamp(); }              // heavy compression (skipped if the browser won't allow it)
+    const j = new Image(); j.onload = () => { x.drawImage(j, 0, 0); stamp(); }; j.src = url;
   });
 }
-async function show() {
-  last = await leak(photos[cur]);
-  fctx.clearRect(0, 0, 420, 560); fctx.drawImage(last, 60, 70, 300, 400, 0, 0, 420, 560);
-  $("next").hidden = photos.length < 2;
-}
 (async () => {
-  photos = (await Promise.all(FACES.map(loadImg))).filter(Boolean);
-  if (!photos.length) photos = [placeholder()];
-  show();
+  photo = await loadImg(PHOTO);
+  drawMosaic(photo || placeholder());
+  $("holder-path").textContent = "place your photo at " + PHOTO;
+  if (photo) { const c = await leak(photo); $("pic").getContext("2d").drawImage(c, 0, 0); $("pic").parentNode.classList.add("has"); }
 })();
-$("file").addEventListener("change", async e => {            // try any picture without touching the code
-  const f = e.target.files[0]; if (!f) return;
-  const i = await loadImg(URL.createObjectURL(f)); if (i) { photos.unshift(i); cur = 0; show(); }
-});
-$("next").addEventListener("click", () => { cur = (cur + 1) % photos.length; show(); });
-$("filter").addEventListener("click", e => { filterOn = !filterOn; e.target.setAttribute("aria-pressed", filterOn); e.target.textContent = "Filter: " + (filterOn ? "on" : "off"); show(); });
 
-// ---------- the sheet ----------
-const setCover = (dx, dy) => cover.style.transform = `translate(${dx}px,${dy}px) rotate(${dx / 14}deg)`;
+// ===== the case file =====
+$("f-tab").textContent = "CASE FILE \u00B7 SLAB 07"; $("f-title").textContent = CASE.title; $("f-no").textContent = "CASE NO. " + CASE.no; $("f-notes").textContent = CASE.notes;
+$("f-list").innerHTML = CASE.rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
+const file = $("file");
+function openFile() { file.hidden = false; requestAnimationFrame(() => requestAnimationFrame(() => file.classList.add("open"))); $("f-close").focus({ preventScroll: true }); }
+function closeFile() { file.classList.remove("open"); setTimeout(() => { file.hidden = true; }, 400); }
+face.addEventListener("click", () => { if (revealed) openFile(); });
+face.addEventListener("keydown", e => { if (revealed && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openFile(); } });
+$("f-close").addEventListener("click", closeFile);
+file.addEventListener("click", e => { if (e.target === file) closeFile(); });
+addEventListener("keydown", e => { if (e.key === "Escape" && !file.hidden) closeFile(); });
+
+// ===== the sheet =====
+const setCover = (dx, dy) => cover.style.transform = `translate(${dx}px,${dy}px) rotate(${dx / 10}deg)`;
 function reveal() {
   if (revealed) return; revealed = true;
-  setCover(18, 150); slab.classList.add("revealed");
+  setCover(44, 228); slab.classList.add("revealed"); face.tabIndex = 0; face.setAttribute("role", "button");
   $("flash").classList.remove("go"); void $("flash").offsetWidth; $("flash").classList.add("go");   // camera flash
-  hint.textContent = "Click the face to look closer.";
+  hint.textContent = "Look closer.";
 }
-function recover() { revealed = false; slab.classList.remove("revealed"); setCover(0, 0); hint.textContent = "Something is under the sheet."; }
+function recover() { revealed = false; slab.classList.remove("revealed"); face.tabIndex = -1; setCover(0, 0); hint.textContent = "Something is under the sheet."; if (!file.hidden) closeFile(); }
 cover.addEventListener("pointerdown", e => { if (revealed) return; drag = { x: e.clientX, y: e.clientY, m: 0 }; cover.setPointerCapture(e.pointerId); slab.classList.add("dragging"); });
 cover.addEventListener("pointermove", e => {
   if (!drag) return;
@@ -93,22 +137,9 @@ cover.addEventListener("pointerup", () => {
 });
 cover.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); reveal(); } });
 $("recover").addEventListener("click", recover);
-
-// ---------- look closer ----------
-face.addEventListener("click", () => {
-  if (!revealed || !last) return;
-  const b = $("big"); b.width = 420; b.height = 560; b.getContext("2d").drawImage(last, 0, 0); $("view").hidden = false;
-});
-$("view").addEventListener("click", () => $("view").hidden = true);
-addEventListener("keydown", e => { if (e.key === "Escape") $("view").hidden = true; });
-
-// ---------- it won't hold still ----------
-setInterval(() => {
-  if (!revealed) return; face.classList.add("glitch"); setTimeout(() => face.classList.remove("glitch"), 90);
-}, 4000 + Math.random() * 5000);
+setInterval(() => { if (revealed) { face.classList.add("glitch"); setTimeout(() => face.classList.remove("glitch"), 90); } }, 4000 + Math.random() * 5000);
 
 /* ============ lights, sound & hallucinations (same as the portfolio, minus the heart monitor) ============ */
-const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const dark = $("dark"), lamp = $("lamp"), lights = $("lights"), soundBtn = $("sound"), halluc = $("halluc"), glowLayer = $("glow");
 
 // Flicker: briefly cuts the light. [ms since start, how far it drops: 0 normal .. 1 almost out].
@@ -135,22 +166,22 @@ const mk = (file, vol, loop) => {
   });
   return a;
 };
-const sfx = { click: mk("Light_switch.mp3", .7), buzz: mk("Light_buzzing.mp3", 0, true), whisper: mk("Whispers.mp3", 0, true) };
+const sfx = { click: mk("Light_switch.mp3", .7), buzz: mk("Light_buzzing.mp3", 0, true), whisper: mk("Whispers.mp3", 0, true), door: mk("Door_creak.mp3", .9) };
 let soundOn = true, unlocked = false, buzzWanted = false, buzzEnv = 0, whVol = 0;
-let lampLit = true, lightsOn = true, lampTimers = [], darkSince = 0;   // darkSince: when the lamp last went out
+let lampLit = false, lightsOn = false, lampTimers = [], darkSince = introPending ? 0 : performance.now();   // the room starts DARK; darkSince = when the lamp last went out
 const BUZZ_VOL = .25, WHISPER_MAX = 1, DARK_MAX = .97;
 function syncAudio() {
   buzzWanted = soundOn && unlocked && !document.hidden && lampLit;
   if (buzzWanted && sfx.buzz.paused) sfx.buzz.play().catch(() => {});
 }
 function playSwitch() { if (!soundOn) return; sfx.click.currentTime = 0; sfx.click.play().catch(() => {}); }
+function playDoor() { if (!soundOn) return; sfx.door.currentTime = 0; sfx.door.play().catch(() => {}); }
 ["pointerdown", "keydown"].forEach(ev => addEventListener(ev, () => { unlocked = true; syncAudio(); }, { once: true }));
 document.addEventListener("visibilitychange", syncAudio);
 soundBtn.addEventListener("click", () => { soundOn = !soundOn; soundBtn.setAttribute("aria-pressed", soundOn); renderSoundBtn(); syncAudio(); });
 
 // ---------- the room light ----------
-// Light ON: the lamp hangs lit and the room is visible. Light OFF: the lamp goes out and the room is nearly black.
-//   off -> the lamp switches off, then is hauled up.   on -> the lamp drops in, THEN switches on (stutter + buzz).
+// You arrive in the dark. Light ON: the lamp drops in and lights. Light OFF: the lamp goes out and the room is nearly black.
 const LAMP_DROP_MS = 1150, LAMP_HAUL_MS = 550;
 function lampLight(on) { lampLit = on; lamp.classList.toggle("on", on); darkSince = on ? 0 : performance.now(); syncAudio(); }
 lights.addEventListener("click", () => {
@@ -168,37 +199,32 @@ lights.addEventListener("click", () => {
   }
   applyDark(performance.now());
 });
-lamp.classList.add("on");                                   // on load the lamp lowers itself into place, already lit
-if (reduce) lamp.classList.add("down"); else setTimeout(() => lamp.classList.add("down"), 300);
 
 // random flicker every 10-15 s (while the buzzing plays, its loop sets the rhythm instead)
 if (!reduce) (function schedule() {
   setTimeout(() => { if (!(lampLit && !sfx.buzz.paused)) startFlicker(); schedule(); }, 10000 + Math.random() * 5000);
 })();
 
-// ---------- hallucinations: after 4 s without light the room starts talking to you, and the whispers swell ----------
+// ---------- hallucinations: after 4 s without light the room starts talking to you, slowly ----------
 const HALLUC_AFTER = 4000;    // ms after the light goes out before it starts
-const HALLUC_RAMP = 40000;    // ms after that until it is at its worst
+const HALLUC_RAMP = 70000;    // ms after that until it is at its worst (it creeps in: the first minute is mostly whispers and the odd word)
 const hallucActive = now => !lampLit && darkSince > 0 && now - darkSince > HALLUC_AFTER;
-const intensity = now => hallucActive(now) ? Math.min(1, (now - darkSince - HALLUC_AFTER) / HALLUC_RAMP) : 0;
+const intensity = now => { if (!hallucActive(now)) return 0; const x = Math.min(1, (now - darkSince - HALLUC_AFTER) / HALLUC_RAMP); return x * x * (1.4 - .4 * x); };   // eased: slow at first
 // the voices want you to stop: stop fighting, stay, leave it dark
 const LINES = ["stop fighting it", "rest now", "let it go", "the dark is kind", "you've done enough", "stay with us", "it's quiet here", "just close your eyes",
   "leave it dark", "you don't need the light", "it's quiet under the sheet", "stay a while"];
-const pickLine = () => pick(LINES);
 const rnd = (a, b) => a + Math.random() * (b - a);
 const pick = arr => arr[Math.random() * arr.length | 0];
 let nextSpawn = 0, figure = null;
 function spawn(i) {
   if (halluc.children.length > 7) return;
   const el = document.createElement("i");
-  if (Math.random() < .62) {              // a whispered invitation to stop trying
-    el.className = "word"; el.textContent = pickLine();
-    let x = rnd(4, 68) + "%", y = rnd(12, 85) + "%";
-    
-    el.style.cssText = `left:${x};top:${y};--a:${(.28 + .45 * i).toFixed(2)}`;
-  } else {                                // a warm light that drifts toward the middle: somewhere safe to go
+  if (Math.random() < (i < .08 ? 1 : .62)) {   // a whispered invitation (only words at first)
+    el.className = "word"; el.textContent = pick(LINES);
+    el.style.cssText = `left:${rnd(4, 68)}%;top:${rnd(12, 85)}%;--a:${(.08 + .5 * i).toFixed(2)}`;
+  } else {                                      // a warm light that drifts toward the middle: somewhere safe to go
     const fromLeft = Math.random() < .5;
-    el.className = "lure"; el.style.cssText = `left:${fromLeft ? 4 : 92}%;top:${rnd(20, 75)}%;--tx:${fromLeft ? 38 : -38}vw;--ty:${rnd(-8, 8).toFixed(1)}vh;--a:${(.25 + .35 * i).toFixed(2)}`;
+    el.className = "lure"; el.style.cssText = `left:${fromLeft ? 4 : 92}%;top:${rnd(20, 75)}%;--tx:${fromLeft ? 38 : -38}vw;--ty:${rnd(-8, 8).toFixed(1)}vh;--a:${(.06 + .4 * i).toFixed(2)}`;
   }
   el.addEventListener("animationend", () => el.remove());
   halluc.appendChild(el);
@@ -208,14 +234,15 @@ function hallucTick(now) {
   halluc.classList.toggle("on", active); slab.classList.toggle("haunted", active);
   halluc.style.setProperty("--hi", i.toFixed(3));
   if (active) {
-    if (i > .2 && !figure) { figure = document.createElement("i"); figure.className = "figure"; halluc.appendChild(figure); }
-    if (figure) figure.style.setProperty("--s", (.6 + .9 * i).toFixed(2));          // it stands a little closer each time you look
+    if (i > .25 && !figure) { figure = document.createElement("i"); figure.className = "figure"; halluc.appendChild(figure); }
+    if (figure) figure.style.setProperty("--s", (.6 + .9 * i).toFixed(2));          // it creeps closer
+    if (nextSpawn === 0) nextSpawn = now + 3500;
     if (now > nextSpawn) {
       spawn(i);
-      if (figure && Math.random() < .3) figure.style.left = (Math.random() < .5 ? 5 : 84) + "%";
-      nextSpawn = now + (3200 - 2400 * i) * rnd(.6, 1.4);
+      if (figure && Math.random() < .3) figure.style.left = (Math.random() < .5 ? 5 : 84) + "%";   // and it is never where you left it
+      nextSpawn = now + (6500 - 5000 * i) * rnd(.6, 1.4);
     }
-  } else if (halluc.firstChild) { halluc.replaceChildren(); figure = null; nextSpawn = 0; }     // the light chases them off
+  } else if (halluc.firstChild) { halluc.replaceChildren(); figure = null; nextSpawn = 0; }     // the light kills them instantly
 }
 
 // ---------- dim glowing lights: something to find in the dark ----------
@@ -243,7 +270,7 @@ function updateGlows(v) {                                       // v: how dark i
 }
 
 // ---------- darkness ----------
-let dk = 0, lastD = performance.now();
+let dk = DARK_MAX, lastD = performance.now();
 function applyDark(now) {
   const f = flickLevel(now), target = lampLit ? 0 : DARK_MAX, step = now - lastD; lastD = now;
   dk = reduce ? target : (target > dk ? Math.min(target, dk + step / 120) : Math.max(target, dk - step / 250));   // blacks out fast, brightens a little slower
@@ -256,13 +283,13 @@ function applyDark(now) {
 // ---------- one frame loop ----------
 let lastA = performance.now();
 (function frame() {
-  const now = performance.now(), dt = now - lastA; lastA = now;
+  const now = performance.now(), dt = Math.max(0, now - lastA); lastA = now;
   // the buzz fades in/out smoothly and cuts out with every flicker
   buzzEnv = buzzWanted ? Math.min(1, buzzEnv + dt / 200) : Math.max(0, buzzEnv - dt / 250);
   sfx.buzz.volume = BUZZ_VOL * buzzEnv * (1 - .9 * Math.min(1, flickLevel(now)));
   if (!buzzWanted && buzzEnv === 0 && !sfx.buzz.paused) { sfx.buzz.pause(); sfx.buzz.currentTime = 0; }
   // whispers: silent until the hallucinations start, then louder and louder; gone the moment the light is back
-  const wT = (soundOn && unlocked && !document.hidden && hallucActive(now)) ? WHISPER_MAX * (.12 + .88 * intensity(now)) : 0;
+  const wT = (soundOn && unlocked && !document.hidden && hallucActive(now)) ? WHISPER_MAX * (.04 + .96 * intensity(now)) : 0;
   whVol += (wT - whVol) * Math.min(1, dt / (wT > whVol ? 900 : 250));
   sfx.whisper.volume = Math.min(1, Math.max(0, whVol));
   if (wT > 0 && sfx.whisper.paused) sfx.whisper.play().catch(() => {});

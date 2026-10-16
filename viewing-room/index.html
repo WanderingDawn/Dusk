@@ -4,59 +4,134 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Viewing Room — Unidentified</title>
-<link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Reenie+Beanie&family=Special+Elite&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div id="intro" class="door-steel" aria-hidden="true">
+  <div class="wall"></div>
+  <div class="frame"><div class="gap"></div>
+    <div class="leaf"><i class="hinge h1"></i><i class="hinge h2"></i><div class="port"></div><div class="sign">Viewing Room<small>authorised personnel only</small></div><i class="lever"></i><i class="hazard"></i></div>
+    <div class="mist"></div>
+    <div class="plate">Cold Storage</div>
+  </div>
+  <p class="prompt">click to pull the door</p>
+</div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <g id="s-stand"><circle cx="20" cy="10" r="8"/><path d="M12 19h16l3 45H9zM13 21L6 24 3 106h4l5-72zM27 21l7 3 3 82h-4l-5-72zM11 62h8l-1 66h-5zM21 62h8l-1 66h-5z"/></g>
+  <g id="s-crawl"><circle cx="106" cy="20" r="6"/><path d="M12 26Q30 6 62 18Q84 26 102 24L108 30Q86 38 62 32Q32 40 12 34zM96 28L112 46 108 48 92 33zM70 30L66 49 62 48 64 30zM34 28L22 47 18 45 30 27zM14 28L4 40 2 37 11 26z"/></g>
+  <g id="s-hand"><path d="M14 100V62Q10 56 12 50L10 20 14 20 17 46 19 8 23 8 24 44 27 4 31 4 31 44 35 12 39 12 37 48 42 36 46 38 40 62 36 100z"/></g>
+</defs></svg>
+<div id="watchers" aria-hidden="true">
+  <svg class="w1" viewBox="0 0 40 130"><use href="#s-stand"/></svg><svg class="w2" viewBox="0 0 40 130"><use href="#s-stand"/></svg>
+  <svg class="w3" viewBox="0 0 120 50"><use href="#s-crawl"/></svg><svg class="w4" viewBox="0 0 50 100"><use href="#s-hand"/></svg>
+</div>
 <div id="dark" aria-hidden="true"></div>
 <div id="glow" aria-hidden="true"></div>
 <div id="halluc" aria-hidden="true"></div>
 <div id="lamp" aria-hidden="true"><div class="lamp-swing">
 <svg viewBox="0 0 120 190" width="120" height="190" style="overflow:visible">
   <defs>
-    <linearGradient id="shadeG" x1="0" x2="1"><stop offset="0" stop-color="#1b2124"/><stop offset=".35" stop-color="#5a676e"/><stop offset=".62" stop-color="#3a444a"/><stop offset="1" stop-color="#14191b"/></linearGradient>
-    <radialGradient id="bulbG"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#eef3e6"/><stop offset="1" stop-color="#b9c7b0"/></radialGradient>
-    <radialGradient id="haloG"><stop offset="0" stop-color="#d6e3cf" stop-opacity=".6"/><stop offset="1" stop-color="#d6e3cf" stop-opacity="0"/></radialGradient>
-    <linearGradient id="coneG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d6e3cf" stop-opacity=".26"/><stop offset="1" stop-color="#d6e3cf" stop-opacity="0"/></linearGradient>
+    <linearGradient id="shadeG" x1="0" x2="1"><stop offset="0" stop-color="#0e1213"/><stop offset=".33" stop-color="#4b564f"/><stop offset=".6" stop-color="#2c3532"/><stop offset="1" stop-color="#0b0f0f"/></linearGradient>
+    <radialGradient id="bulbG"><stop offset="0" stop-color="#fffbe9"/><stop offset=".55" stop-color="#ecdfb8"/><stop offset="1" stop-color="#a99a6c"/></radialGradient>
+    <radialGradient id="haloG"><stop offset="0" stop-color="#cfe0c6" stop-opacity=".55"/><stop offset="1" stop-color="#cfe0c6" stop-opacity="0"/></radialGradient>
+    <linearGradient id="coneG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe0c6" stop-opacity=".24"/><stop offset="1" stop-color="#cfe0c6" stop-opacity="0"/></linearGradient>
+    <filter id="pit" x="0" y="0" width="100%" height="100%"><feTurbulence baseFrequency=".6" numOctaves="2" seed="5"/><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .9 -.35"/><feComposite in2="SourceGraphic" operator="in"/></filter>
   </defs>
   <polygon class="cone" points="36,152 84,152 190,430 -70,430" fill="url(#coneG)"/>
-  <rect x="46" y="0" width="28" height="7" rx="2" fill="#2a3134"/>
-  <line x1="60" y1="7" x2="60" y2="86" stroke="#232a2d" stroke-width="3.5"/>
-  <line x1="60" y1="7" x2="60" y2="86" stroke="#4d595e" stroke-width="3.5" stroke-dasharray="1.4 3.6"/>
-  <rect x="53" y="84" width="14" height="14" rx="2" fill="#303a3e" stroke="#0b0e0f" stroke-width=".6"/>
-  <path d="M60 98C49 98 41 106 32 130L21 147Q19 152 25 152L95 152Q101 152 99 147L88 130C79 106 71 98 60 98Z" fill="url(#shadeG)" stroke="#0b0e0f"/>
-  <path d="M46 111C42 120 38 130 32 141" stroke="rgba(255,255,255,.2)" fill="none" stroke-width="2" stroke-linecap="round"/>
-  <rect x="21" y="148" width="78" height="5" rx="2.5" fill="#20272a" stroke="#0b0e0f" stroke-width=".6"/>
-  <ellipse class="inner" cx="60" cy="153" rx="36" ry="3.5" fill="#e6efde"/>
+  <path d="M44 0h32l-5 9H49z" fill="#1a1f1e" stroke="#040505"/>
+  <path d="M60 9V76" stroke="#1d2120" stroke-width="3.6" stroke-dasharray="5 2.2" stroke-linecap="round"/>
+  <path d="M59 9V76" stroke="#5a5f55" stroke-width="1" stroke-dasharray="5 2.2" stroke-linecap="round" opacity=".6"/>
+  <path d="M55 76h10l-1.5 7h-7z" fill="#3a3426" stroke="#0a0907" stroke-width=".7"/>
+  <rect x="54" y="82" width="12" height="14" rx="2" fill="#2a2f2c" stroke="#070909" stroke-width=".7"/>
+  <path d="M56 86h8M56 90h8" stroke="#0a0c0c" stroke-width="1"/>
+  <path d="M60 94C47 94 40 103 33 126L20 146 24 152q6 6 12 0q6 6 12 0q6 6 12 0q6 6 12 0q6 6 12 0q6 6 12 0L100 146 87 126C80 103 73 94 60 94Z" fill="url(#shadeG)" stroke="#050606" stroke-width="1"/>
+  <g filter="url(#pit)" opacity=".7"><path d="M60 94C47 94 40 103 33 126L20 146 24 152H96L100 146 87 126C80 103 73 94 60 94Z" fill="#8a7a58"/></g>
+  <ellipse cx="38" cy="140" rx="9" ry="5" fill="#7a4a22" opacity=".4"/><ellipse cx="84" cy="132" rx="5" ry="7" fill="#6e4220" opacity=".35"/><ellipse cx="62" cy="112" rx="4" ry="2" fill="#8d6a3a" opacity=".25"/>
+  <path d="M48 108C43 120 38 132 32 142M60 99V146M72 108C77 120 82 132 88 142" stroke="rgba(0,0,0,.4)" fill="none" stroke-width="1.4"/>
+  <path d="M47 110C43 120 39 130 33 141" stroke="rgba(255,255,255,.16)" fill="none" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M60 94L38 104M60 94L44 120M60 94L28 126" stroke="#dcdcd0" stroke-opacity=".2" stroke-width=".5" fill="none"/>
+  <rect x="21" y="148" width="78" height="4" rx="2" fill="#1a201f" opacity=".0"/>
+  <ellipse class="inner" cx="60" cy="153" rx="36" ry="3.5" fill="#e8dfc0"/>
   <circle class="halo" cx="60" cy="162" r="50" fill="url(#haloG)"/>
   <circle class="bulb" cx="60" cy="161" r="9"/>
   <path class="fil" d="M56.5 161l1.75-3.5 1.75 3.5 1.75-3.5 1.75 3.5" stroke="#ffb860" fill="none" stroke-width="1"/>
-  <g stroke="#7f8b8f" stroke-width=".8" fill="none" opacity=".75"><path d="M51 157Q60 178 69 157"/><path d="M60 154V172"/><path d="M52 164H68"/></g>
+  <g stroke="#6f7a74" stroke-width=".8" fill="none" opacity=".75"><path d="M51 157Q60 178 69 157"/><path d="M60 154V172"/><path d="M52 164H68"/></g>
 </svg>
 </div></div>
+
 <main class="room">
   <div class="slab" id="slab">
-    <!-- below the face: bare neck + the sheet from the shoulders down -->
+    <!-- under the face: bare neck and shoulders, then the sheet lit by a single lamp -->
     <svg class="layer sheet" viewBox="0 0 320 800" aria-hidden="true">
       <defs>
-        <linearGradient id="cloth" x1="0" x2="1"><stop offset="0" stop-color="#6f7b78"/><stop offset=".35" stop-color="#b4bfbb"/><stop offset=".7" stop-color="#8f9b97"/><stop offset="1" stop-color="#5d6966"/></linearGradient>
-        <radialGradient id="bump"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
-        <filter id="weave"><feTurbulence baseFrequency=".9" numOctaves="2" result="n"/><feColorMatrix in="n" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .5 -.12"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+        <filter id="drape" filterUnits="userSpaceOnUse" x="0" y="0" width="320" height="800" color-interpolation-filters="sRGB">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="6.5" result="h0"/>
+          <feTurbulence type="fractalNoise" baseFrequency=".02 .05" numOctaves="3" seed="11" result="n1"/>
+          <feColorMatrix in="n1" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.3 0 0 0 -.5" result="n1a"/>
+          <feComposite in="h0" in2="n1a" operator="arithmetic" k1="0" k2="1" k3=".14" k4="0" result="h1"/>
+          <feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="2" seed="3" result="n2"/>
+          <feColorMatrix in="n2" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  .6 0 0 0 -.18" result="n2a"/>
+          <feComposite in="h1" in2="n2a" operator="arithmetic" k1="0" k2="1" k3=".008" k4="0" result="h2"/>
+          <feDiffuseLighting in="h2" surfaceScale="8" diffuseConstant="1.05" lighting-color="#fff" result="lit"><feDistantLight azimuth="235" elevation="52"/></feDiffuseLighting>
+          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 60 0" result="m"/>
+          <feComposite in="lit" in2="m" operator="in"/>
+        </filter>
+        <linearGradient id="skin" x1="0" x2="1"><stop offset="0" stop-color="#4a443c"/><stop offset=".5" stop-color="#9c9282"/><stop offset="1" stop-color="#47423a"/></linearGradient>
+        <linearGradient id="edge" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".6"/><stop offset=".12" stop-color="#000" stop-opacity="0"/><stop offset=".88" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".6"/></linearGradient>
       </defs>
-      <path d="M142 140h36l6 42h-48z" fill="#a39a8c"/>
-      <path id="body" d="M118 170Q160 152 202 170L262 192Q284 204 282 242L276 500Q276 560 270 640L262 770Q260 790 240 790H80Q60 790 58 770L50 640Q44 560 44 500L38 242Q36 204 58 192Z" fill="url(#cloth)" stroke="#3b4442" stroke-width="2"/>
-      <g fill="url(#bump)"><ellipse cx="96" cy="215" rx="52" ry="26"/><ellipse cx="224" cy="215" rx="52" ry="26"/><ellipse cx="160" cy="300" rx="62" ry="70"/><ellipse cx="160" cy="470" rx="70" ry="50"/><ellipse cx="116" cy="600" rx="30" ry="46"/><ellipse cx="204" cy="600" rx="30" ry="46"/><ellipse cx="118" cy="752" rx="22" ry="26"/><ellipse cx="202" cy="752" rx="22" ry="26"/></g>
-      <g fill="none" stroke="rgba(0,0,0,.2)" stroke-width="2" stroke-linecap="round"><path d="M70 300Q110 330 100 400"/><path d="M250 320Q214 350 224 430"/><path d="M60 520Q100 540 92 620"/><path d="M262 540Q222 560 230 640"/><path d="M160 520V700"/></g>
-      <rect x="38" y="160" width="250" height="640" filter="url(#weave)" opacity=".3" style="clip-path:path('M118 170Q160 152 202 170L262 192Q284 204 282 242L276 500Q276 560 270 640L262 770Q260 790 240 790H80Q60 790 58 770L50 640Q44 560 44 500L38 242Q36 204 58 192Z')"/>
+      <g>
+        <path d="M143 134L177 134L180 170Q236 184 270 214L270 262L50 262L50 214Q84 184 140 170Z" fill="url(#skin)"/>
+        <path d="M143 134L177 134L180 170Q236 184 270 214L270 262L50 262L50 214Q84 184 140 170Z" fill="#35506a" opacity=".2" style="mix-blend-mode:multiply"/>
+        <ellipse cx="160" cy="150" rx="27" ry="12" fill="#000" opacity=".4" style="filter:blur(5px)"/>
+        <g fill="none" stroke-linecap="round">
+          <path d="M158 198Q124 200 86 214M162 198Q196 200 234 214" stroke="#2a2620" stroke-opacity=".55" stroke-width="3.5"/>
+          <path d="M158 203Q126 206 90 219M162 203Q194 206 230 219" stroke="#d6ccb9" stroke-opacity=".14" stroke-width="2.5"/>
+          <path d="M150 142L155 188M170 142L165 188" stroke="#2a2620" stroke-opacity=".4" stroke-width="3"/>
+        </g>
+        <ellipse cx="160" cy="192" rx="7" ry="4" fill="#1d1a16" opacity=".5"/>
+      </g>
+      <path id="sheetShape" d="M64 216Q160 244 256 216L276 228Q290 240 288 278L282 500Q282 572 276 652L268 774Q266 796 244 796H76Q54 796 52 774L44 652Q38 572 38 500L32 278Q30 240 44 228Z" fill="#8e9791"/>
+      <g filter="url(#drape)" style="mix-blend-mode:multiply" fill="#fff">
+        <path d="M64 216Q160 244 256 216L276 228Q290 240 288 278L282 500Q282 572 276 652L268 774Q266 796 244 796H76Q54 796 52 774L44 652Q38 572 38 500L32 278Q30 240 44 228Z" fill-opacity=".28"/>
+        <ellipse cx="94" cy="240" rx="40" ry="20" fill-opacity=".5"/><ellipse cx="226" cy="240" rx="40" ry="20" fill-opacity=".5"/>
+        <ellipse cx="160" cy="305" rx="66" ry="62" fill-opacity=".6"/>
+        <ellipse cx="84" cy="360" rx="24" ry="120" fill-opacity=".5"/><ellipse cx="236" cy="360" rx="24" ry="120" fill-opacity=".5"/>
+        <ellipse cx="160" cy="395" rx="54" ry="46" fill-opacity=".48"/><ellipse cx="160" cy="432" rx="42" ry="17" fill-opacity=".72"/>
+        <ellipse cx="160" cy="492" rx="72" ry="42" fill-opacity=".56"/>
+        <ellipse cx="122" cy="575" rx="36" ry="92" fill-opacity=".52"/><ellipse cx="198" cy="575" rx="36" ry="92" fill-opacity=".52"/>
+        <ellipse cx="122" cy="652" rx="25" ry="24" fill-opacity=".66"/><ellipse cx="198" cy="652" rx="25" ry="24" fill-opacity=".66"/>
+        <ellipse cx="122" cy="716" rx="22" ry="56" fill-opacity=".46"/><ellipse cx="198" cy="716" rx="22" ry="56" fill-opacity=".46"/>
+        <ellipse cx="116" cy="770" rx="20" ry="28" fill-opacity=".82"/><ellipse cx="204" cy="770" rx="20" ry="28" fill-opacity=".82"/>
+        <g fill="none" stroke="#fff" stroke-linecap="round" stroke-width="5" stroke-opacity=".3">
+          <path d="M96 640C100 600 120 540 150 500"/><path d="M224 640C220 600 200 540 170 500"/><path d="M62 262C70 300 78 330 82 372"/><path d="M258 262C250 300 242 330 238 372"/>
+          <path d="M110 676C116 690 118 704 120 730"/><path d="M210 676C204 690 202 704 200 730"/><path d="M130 440C140 470 138 490 134 520"/><path d="M190 440C180 470 182 490 186 520"/>
+        </g>
+      </g>
+      <g style="mix-blend-mode:multiply" fill="#7a6228">
+        <ellipse cx="150" cy="322" rx="22" ry="30" opacity=".12" style="filter:blur(7px)"/><ellipse cx="190" cy="500" rx="26" ry="18" opacity=".1" style="filter:blur(8px)"/>
+        <ellipse cx="116" cy="690" rx="14" ry="26" opacity=".09" style="filter:blur(6px)"/><ellipse cx="170" cy="250" rx="30" ry="8" opacity=".1" style="filter:blur(5px)"/>
+      </g>
+      <path d="M64 216Q160 244 256 216L276 228Q290 240 288 278L282 500Q282 572 276 652L268 774Q266 796 244 796H76Q54 796 52 774L44 652Q38 572 38 500L32 278Q30 240 44 228Z" fill="url(#edge)" style="mix-blend-mode:multiply"/>
+      <path d="M64 216Q160 244 256 216" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="2.5"/>
+      <path d="M64 216Q160 244 256 216L276 228Q290 240 288 278L282 500Q282 572 276 652L268 774Q266 796 244 796H76Q54 796 52 774L44 652Q38 572 38 500L32 278Q30 240 44 228Z" fill="none" stroke="#161b19" stroke-opacity=".85" stroke-width="3"/>
     </svg>
-    <canvas id="face" class="face" width="420" height="560" aria-label="The face under the sheet"></canvas>
-    <!-- above the face: the sheet over the head. Drag it down, or just click it. -->
+    <!-- the face: an extreme mosaic, until someone looks closer -->
+    <canvas id="face" class="face" width="9" height="12" aria-label="The face under the sheet (obscured)"></canvas>
+    <!-- the cloth over the head: drag it down, or just click it -->
     <svg class="layer cap" viewBox="0 0 320 800">
       <g id="cover" tabindex="0" role="button" aria-label="Pull back the sheet">
-        <path d="M160 18C98 18 92 92 102 128C106 150 72 160 60 198L260 198C248 160 214 150 218 128C228 92 222 18 160 18Z" fill="url(#cloth)" stroke="#3b4442" stroke-width="2"/>
-        <ellipse cx="160" cy="80" rx="46" ry="60" fill="url(#bump)"/>
-        <g fill="none" stroke="rgba(0,0,0,.22)" stroke-width="2" stroke-linecap="round"><path d="M104 130Q130 150 120 186"/><path d="M216 130Q190 150 200 186"/><path d="M140 60Q150 100 146 130"/></g>
-        <path d="M64 192Q160 208 256 192" fill="none" stroke="rgba(0,0,0,.28)" stroke-width="3"/>
+        <path d="M160 14C100 14 92 88 100 128C104 150 74 164 58 214L262 214C246 164 216 150 220 128C228 88 220 14 160 14Z" fill="#8e9791"/>
+        <g filter="url(#drape)" style="mix-blend-mode:multiply" fill="#fff">
+          <path d="M160 14C100 14 92 88 100 128C104 150 74 164 58 214L262 214C246 164 216 150 220 128C228 88 220 14 160 14Z" fill-opacity=".3"/>
+          <ellipse cx="160" cy="90" rx="46" ry="64" fill-opacity=".62"/><ellipse cx="160" cy="104" rx="5.5" ry="22" fill-opacity=".95"/>
+          <ellipse cx="160" cy="72" rx="26" ry="7" fill-opacity=".78"/><ellipse cx="133" cy="104" rx="13" ry="10" fill-opacity=".72"/><ellipse cx="187" cy="104" rx="13" ry="10" fill-opacity=".72"/>
+          <ellipse cx="160" cy="128" rx="15" ry="5" fill-opacity=".72"/><ellipse cx="160" cy="146" rx="15" ry="10" fill-opacity=".78"/>
+          <ellipse cx="92" cy="206" rx="34" ry="14" fill-opacity=".5"/><ellipse cx="228" cy="206" rx="34" ry="14" fill-opacity=".5"/>
+          <g fill="none" stroke="#fff" stroke-linecap="round" stroke-width="4" stroke-opacity=".3"><path d="M150 150C132 170 116 188 104 204"/><path d="M170 150C188 170 204 188 216 204"/><path d="M156 112C140 118 132 124 122 132"/><path d="M164 112C180 118 188 124 198 132"/></g>
+        </g>
+        <g fill="#000" opacity=".12" style="filter:blur(3px)"><ellipse cx="138" cy="90" rx="10" ry="5"/><ellipse cx="182" cy="90" rx="10" ry="5"/><ellipse cx="160" cy="131" rx="12" ry="2.4"/></g>
+        <path d="M62 208Q160 230 258 208" fill="none" stroke="rgba(0,0,0,.4)" stroke-width="3"/>
       </g>
     </svg>
     <div class="tag" id="tag"><b>UNIDENTIFIED</b><span>SLAB 07</span></div>
@@ -65,17 +140,28 @@
 </main>
 
 <nav class="ui">
+  <span class="shades"><svg class="n1" viewBox="0 0 40 130"><use href="#s-stand"/></svg><svg class="n2" viewBox="0 0 120 50"><use href="#s-crawl"/></svg><svg class="n3" viewBox="0 0 50 100"><use href="#s-hand"/></svg></span>
   <a href="../index.html">&larr; Back to the portfolio</a>
-  <label class="btn">Change photo<input type="file" id="file" accept="image/*" hidden></label>
-  <button class="btn" id="next" hidden>Next photo</button>
-  <button class="btn" id="filter" aria-pressed="true">Filter: on</button>
-  <button class="btn" id="lights" aria-pressed="true">Light: on</button>
-  <button class="btn" id="sound" aria-pressed="true">Sound: on</button>
   <button class="btn" id="recover">Cover again</button>
+  <button class="btn" id="lights" aria-pressed="false">Light: off</button>
+  <button class="btn" id="sound" aria-pressed="true">Sound: on</button>
 </nav>
 
-<div id="view" hidden><canvas id="big"></canvas></div>
+<div id="file" hidden>
+  <article class="dossier" role="dialog" aria-label="Case file" tabindex="-1">
+    <div class="tab" id="f-tab"></div>
+    <div class="sheet">
+      <header><h2 id="f-title"></h2><p class="no" id="f-no"></p></header>
+      <div class="photo"><canvas id="pic" width="420" height="560"></canvas><div class="holder" id="holder">PHOTO<small id="holder-path"></small></div><b class="clip"></b></div>
+      <dl id="f-list"></dl>
+      <p class="notes" id="f-notes"></p>
+      <div class="stamp">UNIDENTIFIED</div>
+    </div>
+    <button class="btn" id="f-close">Close file</button>
+  </article>
+</div>
 <div id="flash"></div>
+
 <script src="script.js"></script>
 </body>
 </html>

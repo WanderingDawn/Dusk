@@ -15,6 +15,28 @@ const skills = [
 ];
 /* =================================== */
 
+// ===== Opening: a heavy door swings open, then you walk through it =====
+const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const intro = document.getElementById("intro");
+let introPending = !!intro && !REDUCE;
+function openIntro() {
+  if (!introPending || intro.classList.contains("go")) return;
+  intro.classList.add("go");                                    // the leaves swing open
+  playDoor();
+  setTimeout(() => intro.classList.add("through"), 2000);       // then the camera walks through
+  setTimeout(() => {
+    intro.remove(); introPending = false; document.body.classList.remove("introing");
+    if (!lampLit) darkSince = performance.now();                // the clock on the dark starts when you step inside
+  }, 3400);
+}
+if (intro && REDUCE) intro.remove();
+if (introPending) {
+  document.body.classList.add("introing");
+  intro.addEventListener("click", openIntro);
+  addEventListener("keydown", e => { if (introPending && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openIntro(); } });
+  setTimeout(openIntro, 4500);                                  // it opens by itself if you do nothing
+}
+
 // Dynamic background: the room changes with the section you are reading.
 const room = document.getElementById("room");
 const steel = room.querySelector(".s-steel");
@@ -95,13 +117,13 @@ new IntersectionObserver((es, ob) => es.forEach(e => {
   }
 }), { threshold: .4 }).observe(skillList);
 
-// Room light. Light ON: the lamp hangs lit and the room is visible. Light OFF: the lamp goes out and the room is nearly black.
+// Room light. You arrive in the dark: the light starts OFF. Light ON: the lamp drops in and lights. Light OFF: the lamp goes out and the room is nearly black.
 //   off -> the lamp switches off, then is hauled up.   on -> the lamp drops in, THEN switches on (stutter + buzz).
 const dark = document.getElementById("dark"), lights = document.getElementById("lights"), lamp = document.getElementById("lamp");
 const LAMP_DROP_MS = 1150;   // time for the lamp to drop before it lights
 const LAMP_HAUL_MS = 550;    // pause after it switches off before it is hauled up
 const DARK_MAX = .97;        // how black the room gets with the light off (0 to 1)
-let lampLit = true, lightsOn = true, lampTimers = [], darkSince = 0;   // darkSince: when the lamp last went out
+let lampLit = false, lightsOn = false, lampTimers = [], darkSince = introPending ? 0 : performance.now();   // the room starts DARK; darkSince = when the lamp last went out
 function lampLight(on) { lampLit = on; lamp.classList.toggle("on", on); darkSince = on ? 0 : performance.now(); syncAudio(); }
 lights.addEventListener("click", () => {
   lampTimers.forEach(clearTimeout); lampTimers = [];
@@ -119,9 +141,6 @@ lights.addEventListener("click", () => {
   }
   applyDark(dim, performance.now());
 });
-// on load the lamp lowers itself into place, already lit
-lamp.classList.add("on");
-setTimeout(() => lamp.classList.add("down"), 300);
 
 // Heart monitor: beats, then flatlines. Click to revive.
 const cv = document.getElementById("ecg"), ctx = cv.getContext("2d");
@@ -136,8 +155,16 @@ const buf = new Array(cv.width).fill(0);
 let alive = true, born = performance.now(), sampleAcc = 0, lastDraw = performance.now();
 // Where we are in the heartbeat cycle (0..1, with the R-spike at .3). Follows the audio clock when the
 // heartbeat is playing, so every beep lands exactly on a spike; otherwise it free-runs at the same rate.
-function beatPhase(now) {
-  const a = sfx.beat, sec = (!a.paused && a.readyState >= 2) ? a.currentTime : now / 1000;
+let clockOff = null;   // audio clock minus wall clock, smoothed (the audio clock only ticks in chunks)
+function beatPhase(ts) {
+  const a = sfx.beat, LOOP = 60.996;
+  let sec = ts / 1000;
+  if (!a.paused && a.readyState >= 2) {
+    const measured = a.currentTime - performance.now() / 1000;
+    if (clockOff === null) clockOff = measured;
+    else clockOff += ((((measured - clockOff + LOOP / 2) % LOOP) + LOOP) % LOOP - LOOP / 2) * .08;   // wrap-aware: the loop is exactly 43 beats long
+    sec += clockOff;
+  } else clockOff = null;
   const ph = (((sec - BEAT_T0) / BEAT_PERIOD) % 1 + 1) % 1;
   return (ph + .3) % 1;
 }
@@ -187,7 +214,8 @@ const sfx = {
   beat:  mk("Heart_monitor.mp3", .35, true),   // loops while the pulse is beating
   flat:  mk("Flatline.mp3", .5, true),         // replaces the beat while flatlined
   whisper: mk("Whispers.mp3", 0, true),       // hallucinations: loops, swelling louder the longer you sit in the dark
-  heart: mk("Heartbeat.mp3", 1)               // one shot on reviving the monitor: starts at full volume and fades out
+  heart: mk("Heartbeat.mp3", 1),              // one shot on reviving the monitor: starts at full volume and fades out
+  door:  mk("Door_heavy.mp3", .9)             // the opening door
 };
 let soundOn = true, unlocked = false;
 const BUZZ_VOL = .25;                       // buzz loudness at full strength (0 to 1)
@@ -207,6 +235,7 @@ function syncAudio() {
   buzzWanted = live && lampLit;
   if (buzzWanted && sfx.buzz.paused) sfx.buzz.play().catch(() => {});
 }
+function playDoor() { if (!soundOn) return; sfx.door.currentTime = 0; sfx.door.play().catch(() => {}); }
 function playHeartbeat() {
   if (!soundOn) return;
   sfx.heart.currentTime = 0; sfx.heart.volume = 1; sfx.heart.play().catch(() => {}); hbStart = performance.now();
@@ -233,7 +262,7 @@ let lastA = performance.now();
   buzzEnv = buzzWanted ? Math.min(1, buzzEnv + dt / 200) : Math.max(0, buzzEnv - dt / 250);
   sfx.buzz.volume = BUZZ_VOL * buzzEnv * (1 - .9 * Math.min(1, flickLevel(now)));
   // whispers: silent until the hallucinations start, then louder and louder; gone the moment the light is back
-  const wT = (soundOn && unlocked && !document.hidden && hallucActive(now)) ? WHISPER_MAX * (.12 + .88 * intensity(now)) : 0;
+  const wT = (soundOn && unlocked && !document.hidden && hallucActive(now)) ? WHISPER_MAX * (.04 + .96 * intensity(now)) : 0;
   whVol += (wT - whVol) * Math.min(1, dt / (wT > whVol ? 900 : 250));
   sfx.whisper.volume = Math.min(1, Math.max(0, whVol));
   if (wT > 0 && sfx.whisper.paused) sfx.whisper.play().catch(() => {});
@@ -257,7 +286,7 @@ if (!reduce) (function schedule() {
 })();
 
 // ===== Darkness =====  pen: penalty dimming while the pulse is flat (0 to 1)
-let dk = 0, lastD = performance.now();
+let dk = DARK_MAX, lastD = performance.now();
 function applyDark(pen, now) {
   const f = flickLevel(now);
   const target = lampLit ? .9 * pen : DARK_MAX;
@@ -303,7 +332,7 @@ function updateGlows(v) {                                       // v: how dark i
 
 // ===== Hallucinations: after 4 s without light (or once the dark is total) the room starts talking to you, and the whispers swell =====
 const HALLUC_AFTER = 4000;    // ms after the light goes out before it starts
-const HALLUC_RAMP = 40000;    // ms after that until it is at its worst
+const HALLUC_RAMP = 70000;    // ms after that until it is at its worst (it creeps in: the first minute is mostly whispers and the odd word)
 const WHISPER_MAX = 1;        // whisper volume at its worst (0 to 1)
 // It starts when the light has been out for 4 s, OR the moment the penalty darkness has fully closed in on a flat pulse.
 function hallucStart() {
@@ -312,7 +341,7 @@ function hallucStart() {
   return Math.min(a, b);
 }
 const hallucActive = now => hallucStart() <= now;
-const intensity = now => hallucActive(now) ? Math.min(1, (now - hallucStart()) / HALLUC_RAMP) : 0;
+const intensity = now => { if (!hallucActive(now)) return 0; const x = Math.min(1, (now - hallucStart()) / HALLUC_RAMP); return x * x * (1.4 - .4 * x); };   // eased: slow at first
 // the voices want you to stop: stop reviving, stop fighting, leave it dark
 const LINES = ["stop fighting it", "rest now", "let it go", "the dark is kind", "you've done enough", "stay with us", "it's quiet here", "just close your eyes", "come closer"];
 const DARK_LINES = ["leave it dark", "you don't need the light", "stay in the dark"];
@@ -324,17 +353,17 @@ let nextSpawn = 0, figure = null;
 function spawn(i) {
   if (halluc.children.length > 7) return;
   const el = document.createElement("i");
-  if (Math.random() < .62) {              // a whispered invitation to stop trying
+  if (Math.random() < (i < .08 ? 1 : .62)) {   // a whispered invitation to stop trying (only words at first)
     el.className = "word"; el.textContent = pickLine();
     let x = rnd(4, 68) + "%", y = rnd(12, 85) + "%";
     if (!alive) {                          // with a flat pulse, the voices gather around the monitor
       const m = document.querySelector(".monitor").getBoundingClientRect();
       if (m.bottom > 40 && m.top < innerHeight - 40 && Math.random() < .6) { x = (m.left + rnd(0, m.width * .55)).toFixed(0) + "px"; y = (m.top - rnd(14, 44)).toFixed(0) + "px"; }
     }
-    el.style.cssText = `left:${x};top:${y};--a:${(.28 + .45 * i).toFixed(2)}`;
+    el.style.cssText = `left:${x};top:${y};--a:${(.08 + .5 * i).toFixed(2)}`;
   } else {                                // a warm light that drifts toward the middle: somewhere safe to go
     const fromLeft = Math.random() < .5;
-    el.className = "lure"; el.style.cssText = `left:${fromLeft ? 4 : 92}%;top:${rnd(20, 75)}%;--tx:${fromLeft ? 38 : -38}vw;--ty:${rnd(-8, 8).toFixed(1)}vh;--a:${(.25 + .35 * i).toFixed(2)}`;
+    el.className = "lure"; el.style.cssText = `left:${fromLeft ? 4 : 92}%;top:${rnd(20, 75)}%;--tx:${fromLeft ? 38 : -38}vw;--ty:${rnd(-8, 8).toFixed(1)}vh;--a:${(.06 + .4 * i).toFixed(2)}`;
   }
   el.addEventListener("animationend", () => el.remove());
   halluc.appendChild(el);
@@ -344,12 +373,13 @@ function hallucTick(now) {
   halluc.classList.toggle("on", active);
   halluc.style.setProperty("--hi", i.toFixed(3));
   if (active) {
-    if (i > .2 && !figure) { figure = document.createElement("i"); figure.className = "figure"; halluc.appendChild(figure); }
+    if (i > .25 && !figure) { figure = document.createElement("i"); figure.className = "figure"; halluc.appendChild(figure); }
     if (figure) figure.style.setProperty("--s", (.6 + .9 * i).toFixed(2));          // it stands a little closer each time you look
+    if (nextSpawn === 0) nextSpawn = now + 3500;
     if (now > nextSpawn) {
       spawn(i);
       if (figure && Math.random() < .3) figure.style.left = (Math.random() < .5 ? 5 : 84) + "%";
-      nextSpawn = now + (3200 - 2400 * i) * rnd(.6, 1.4);
+      nextSpawn = now + (6500 - 5000 * i) * rnd(.6, 1.4);
     }
   } else if (halluc.firstChild) { halluc.replaceChildren(); figure = null; nextSpawn = 0; }     // the light chases them off
 }
@@ -396,14 +426,15 @@ function tick() {
   }
   applyDark(dim, now);
   hallucTick(now);
-  sampleAcc += Math.min(now - lastDraw, 100) * SAMPLE_RATE / 1000; lastDraw = now;
+  sampleAcc += Math.min(now - lastDraw, 500) * SAMPLE_RATE / 1000; lastDraw = now;
   while (sampleAcc >= 1) {
+    const ts = now - (sampleAcc - 1) * 1000 / SAMPLE_RATE;      // each sample gets its own moment, so a slow frame can't make stair-steps
     sampleAcc--;
-    buf.push(alive ? wave(beatPhase(now)) : (Math.random() - .5) * .01);
+    buf.push(alive ? wave(beatPhase(ts)) : (Math.random() - .5) * .01);
     buf.shift();
   }
   ctx.clearRect(0, 0, cv.width, cv.height);
-  ctx.strokeStyle = alive ? "#b8c4b2" : "#c42626";
+  ctx.strokeStyle = alive ? "#8fe0ae" : "#c42626";
   ctx.lineWidth = 2; ctx.shadowBlur = 8; ctx.shadowColor = ctx.strokeStyle;
   ctx.beginPath();
   buf.forEach((v, x) => { const y = cv.height * .65 - v * cv.height * .5; x ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
@@ -412,10 +443,10 @@ function tick() {
 }
 if (reduce) {
   buf.forEach((_, i) => buf[i] = wave((i % 85) / 85));
-  ctx.strokeStyle = "#b8c4b2"; ctx.lineWidth = 2; ctx.beginPath();
+  ctx.strokeStyle = "#8fe0ae"; ctx.lineWidth = 2; ctx.beginPath();
   buf.forEach((v, x) => { const y = cv.height * .65 - v * cv.height * .5; x ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
   ctx.stroke();
 } else tick();
 
 document.getElementById("yr").textContent = new Date().getFullYear();
-if (reduce) { lamp.classList.add("down"); applyDark(0, performance.now()); }
+if (reduce) applyDark(0, performance.now());
