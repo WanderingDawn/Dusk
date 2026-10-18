@@ -7,7 +7,7 @@ const CASE = {                             // what the case file says
   no: "2009-0314-07",
   rows: [
     ["Estimated age", "17 (\u00B1 1 years)"], ["Sex", "Male"], ["Height / weight", "158 cm / 85 kg"], ["Hair / eyes", "Dark brown / closed"],
-    ["Recovered", "14 March 2026, 02:47"], ["Location", "Riverbank, below the north bridge"], ["Time since death", "36\u201348 hours (est.)"],
+    ["Recovered", "14 March 2026, 02:47"], ["Location", "Riverbank, below the north bridge"], ["Time since death", "undetermined"],
     ["Cause of death", "Pending examination"], ["Marks", "Healed fracture, left wrist. No tattoos."], ["Effects", "None recovered"]
   ],
   notes: "Rigor does not match the estimate. He was still warm when we brought him in. Please don't leave the room dark."
