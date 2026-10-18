@@ -1,40 +1,37 @@
 /* ===== EDIT YOUR CONTENT HERE ===== */
 const projects = [
-  { id: "001", title: "Project One", year: "2025", role: "Design & development",
-    cause: "Describe what this project is and the problem it solved.",
-    tags: ["HTML", "CSS", "JavaScript"], link: "#" },
-  { id: "002", title: "Project Two", year: "2024", role: "Full-stack",
-    cause: "Describe what this project is and the problem it solved.",
-    tags: ["React", "Node", "PostgreSQL"], link: "#" },
-  { id: "003", title: "Project Three", year: "2023", role: "UI / Branding",
-    cause: "Describe what this project is and the problem it solved.",
-    tags: ["Figma", "Illustration"], link: "#" }
+  { id: "001", title: "Unknown", year: "???", role: "Unknown",
+    cause: "Not yet known.",
+    tags: ["Undetermined"], link: "#" }
 ];
 const skills = [
-  ["Front-end", 4], ["Back-end", 4], ["UI design", 10], ["Dread", 100]
+  ["Front-end", 4], ["Back-end", 4], ["UI design", 15], ["Dread", 100]
 ];
 /* =================================== */
 
 // ===== Opening: a heavy door swings open, then you walk through it =====
 const REDUCE = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const intro = document.getElementById("intro");
-let introPending = !!intro && !REDUCE;
+let introPending = !!intro;
+let safeMode = true; try { safeMode = localStorage.getItem("morgue.safe") !== "0"; } catch (e) {}   // epilepsy mode: ON unless you switched it off
+let chaos = 0;                                                  // extra flicker pushed in by the black box of the viewing room (-1 to 1)
 function openIntro() {
-  if (!introPending || intro.classList.contains("go")) return;
-  intro.classList.add("go");                                    // the leaves swing open
+  if (!introPending) return;
+  if (intro.classList.contains("go")) { intro.classList.add("through"); return; }    // a second click hurries you through
+  intro.classList.add("go");                                    // the latch, then the leaves swing open
   playDoor();
-  setTimeout(() => intro.classList.add("through"), 2000);       // then the camera walks through
+  const k = REDUCE ? .45 : 1;                                   // reduced motion: the door fades open instead of swinging
+  setTimeout(() => intro.classList.add("through"), 3300 * k);   // then the camera walks through
   setTimeout(() => {
     intro.remove(); introPending = false; document.body.classList.remove("introing");
     if (!lampLit) darkSince = performance.now();                // the clock on the dark starts when you step inside
-  }, 3400);
+  }, 4800 * k);
 }
-if (intro && REDUCE) intro.remove();
 if (introPending) {
   document.body.classList.add("introing");
   intro.addEventListener("click", openIntro);
   addEventListener("keydown", e => { if (introPending && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openIntro(); } });
-  setTimeout(openIntro, 4500);                                  // it opens by itself if you do nothing
+  setTimeout(openIntro, REDUCE ? 2500 : 6500);                  // it opens by itself if you do nothing
 }
 
 // Dynamic background: the room changes with the section you are reading.
@@ -186,6 +183,7 @@ function startFlicker() { flickAt = performance.now(); }
 function flickLevel(now) {
   if (flickAt < 0) return 0;
   const e = now - flickAt;
+  if (safeMode) { if (e > 1100) { flickAt = -1; return 0; } return .42 * Math.sin(Math.PI * e / 1100); }   // epilepsy mode: one slow, gentle dip instead of a strobe
   if (e > FLICKER_END) { flickAt = -1; return 0; }
   let lv = 0;
   for (const [t, l] of FLICKER) if (e >= t) lv = l;
@@ -292,9 +290,9 @@ function applyDark(pen, now) {
   const target = lampLit ? .9 * pen : DARK_MAX;
   const step = now - lastD; lastD = now;
   dk = reduce ? target : (target > dk ? Math.min(target, dk + step / 120) : Math.max(target, dk - step / 250));   // blacks out fast, brightens a little slower
-  const v = Math.max(dk, .9 * f);                                // every flicker cuts the light
+  const v = Math.min(DARK_MAX, Math.max(0, Math.max(dk, .9 * f) + chaos));                                // every flicker cuts the light
   dark.style.setProperty("--dk", v.toFixed(3));
-  lamp.style.setProperty("--lit", (1 - .85 * Math.max(pen, f)).toFixed(2));   // the bulb dims with every flicker and penalty
+  lamp.style.setProperty("--lit", (1 - .85 * Math.max(pen, f, Math.abs(chaos))).toFixed(2));   // the bulb dims with every flicker and penalty
   updateGlows(v);
 }
 
@@ -349,7 +347,7 @@ const PULSE_LINES = ["let it stay flat", "stop reviving it", "let it rest", "you
 function pickLine() { return pick(LINES.concat(lampLit ? [] : DARK_LINES, alive ? [] : PULSE_LINES, alive ? [] : PULSE_LINES)); }
 const rnd = (a, b) => a + Math.random() * (b - a);
 const pick = arr => arr[Math.random() * arr.length | 0];
-let nextSpawn = 0, figure = null;
+let nextSpawn = 0;
 function spawn(i) {
   if (halluc.children.length > 7) return;
   const el = document.createElement("i");
@@ -373,15 +371,9 @@ function hallucTick(now) {
   halluc.classList.toggle("on", active);
   halluc.style.setProperty("--hi", i.toFixed(3));
   if (active) {
-    if (i > .25 && !figure) { figure = document.createElement("i"); figure.className = "figure"; halluc.appendChild(figure); }
-    if (figure) figure.style.setProperty("--s", (.6 + .9 * i).toFixed(2));          // it stands a little closer each time you look
     if (nextSpawn === 0) nextSpawn = now + 3500;
-    if (now > nextSpawn) {
-      spawn(i);
-      if (figure && Math.random() < .3) figure.style.left = (Math.random() < .5 ? 5 : 84) + "%";
-      nextSpawn = now + (6500 - 5000 * i) * rnd(.6, 1.4);
-    }
-  } else if (halluc.firstChild) { halluc.replaceChildren(); figure = null; nextSpawn = 0; }     // the light chases them off
+    if (now > nextSpawn) { spawn(i); nextSpawn = now + (6500 - 5000 * i) * rnd(.6, 1.4); }
+  } else if (halluc.firstChild) { halluc.replaceChildren(); nextSpawn = 0; }     // the light chases them off
 }
 function renderPulse() {
   pulse.classList.toggle("dead", !alive);
@@ -421,11 +413,12 @@ function tick() {
   if (!bz.paused && bz.duration) {
     const left = (bz.duration - bz.currentTime) * 1000;
     if (left > 0 && left <= FLICKER_END) {
-      if (!buzzFlicked) { buzzFlicked = true; flickAt = now - (FLICKER_END - left); }
+      if (!buzzFlicked) { buzzFlicked = true; flickAt = safeMode ? now : now - (FLICKER_END - left); }
     } else if (left > FLICKER_END + 500) buzzFlicked = false;
   }
   applyDark(dim, now);
   hallucTick(now);
+  if (typeof Atmos !== "undefined") Atmos.tick();
   sampleAcc += Math.min(now - lastDraw, 500) * SAMPLE_RATE / 1000; lastDraw = now;
   while (sampleAcc >= 1) {
     const ts = now - (sampleAcc - 1) * 1000 / SAMPLE_RATE;      // each sample gets its own moment, so a slow frame can't make stair-steps

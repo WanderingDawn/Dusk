@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=IM+Fell+English:ital@0;1&family=Special+Elite&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="atmosphere.css">
 </head>
 <body>
 <div id="intro" class="door-gothic" aria-hidden="true">
@@ -17,15 +18,6 @@
     <div class="plate">Dept. of the Deceased</div>
   </div>
   <p class="prompt">click to push the door</p>
-</div>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-  <g id="s-stand"><circle cx="20" cy="10" r="8"/><path d="M12 19h16l3 45H9zM13 21L6 24 3 106h4l5-72zM27 21l7 3 3 82h-4l-5-72zM11 62h8l-1 66h-5zM21 62h8l-1 66h-5z"/></g>
-  <g id="s-crawl"><circle cx="106" cy="20" r="6"/><path d="M12 26Q30 6 62 18Q84 26 102 24L108 30Q86 38 62 32Q32 40 12 34zM96 28L112 46 108 48 92 33zM70 30L66 49 62 48 64 30zM34 28L22 47 18 45 30 27zM14 28L4 40 2 37 11 26z"/></g>
-  <g id="s-hand"><path d="M14 100V62Q10 56 12 50L10 20 14 20 17 46 19 8 23 8 24 44 27 4 31 4 31 44 35 12 39 12 37 48 42 36 46 38 40 62 36 100z"/></g>
-</defs></svg>
-<div id="watchers" aria-hidden="true">
-  <svg class="w1" viewBox="0 0 40 130"><use href="#s-stand"/></svg><svg class="w2" viewBox="0 0 40 130"><use href="#s-stand"/></svg>
-  <svg class="w3" viewBox="0 0 120 50"><use href="#s-crawl"/></svg><svg class="w4" viewBox="0 0 50 100"><use href="#s-hand"/></svg>
 </div>
 <div id="room" aria-hidden="true" data-scene="wall">
   <span class="scene s-wall"><i class="drip" style="left:14%"></i><i class="drip" style="left:47%;animation-delay:-3s"></i><i class="drip" style="left:81%;animation-delay:-5.5s"></i></span>
@@ -70,14 +62,13 @@
 </div></div>
 
 <header class="bar">
-  <span class="shades"><svg class="n1" viewBox="0 0 40 130"><use href="#s-stand"/></svg><svg class="n2" viewBox="0 0 120 50"><use href="#s-crawl"/></svg><svg class="n3" viewBox="0 0 50 100"><use href="#s-hand"/></svg></span>
   <a href="#top" class="mark">Dept. of the Deceased</a>
   <nav>
     <a href="#report">Report</a>
     <a href="#drawers">Cold storage</a>
     <a href="#vitals">Vitals</a>
     <a href="#last-words">Last words</a>
-    <a href="viewing-room/index.html">Viewing room</a>
+    <a href="viewing-room/index.html" data-leave>Viewing room</a>
   </nav>
 </header>
 
@@ -85,6 +76,7 @@
     <button id="lights" class="toggle" aria-pressed="false">Light: off</button>
     <button id="penalty" class="toggle" aria-pressed="true">Penalty: on</button>
     <button id="sound" class="toggle" aria-pressed="true">Sound: on</button>
+    <button id="safe" class="toggle" aria-pressed="true">Epilepsy mode: on</button>
 </div>
 
 <main id="top">
@@ -127,11 +119,12 @@
     <h2>Last words</h2>
     <p class="big">If you are reading this, you have already opened the door. <a href="mailto:bryanpalarao57@Gmail.com">bryanpalarao57@Gmail.com</a></p>
     <p class="links"><a href="https://github.com/WanderingDawn">GitHub</a></p>
-    <a class="doorlink" href="viewing-room/index.html">Enter the viewing room</a>
+    <a class="doorlink" href="viewing-room/index.html" data-leave>Enter the viewing room</a>
   </section>
 </main>
 
 <footer data-scene="satin">Born 2008. Buried under deadlines. &copy; <span id="yr"></span> Kent Bryan A. Palarao.</footer>
 <script src="script.js"></script>
+<script src="atmosphere.js"></script>
 </body>
 </html>

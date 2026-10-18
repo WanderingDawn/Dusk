@@ -1,0 +1,72 @@
+/* ======================================================================
+   atmosphere.css — what visits you in the dark (shared by the portfolio and the viewing room)
+   ====================================================================== */
+#apparitions{position:fixed;inset:0;z-index:54;pointer-events:none;overflow:hidden}
+
+/* the figures: Silhouette 1 (the suit, anywhere, any time), Silhouette 2 (the veiled one, only when the pulse fails) */
+.gw{position:absolute;bottom:0}
+.gw.left{left:2%}.gw.right{right:2%}
+.gimg{display:block;height:min(66vh,620px);width:auto;opacity:0;transition:opacity .9s ease}
+.g2 .gimg{height:min(74vh,700px)}
+.gw.on .gimg{opacity:var(--o,.15)}
+.say{position:absolute;width:max-content;max-width:min(250px,34vw);font:.95rem/1.4 var(--type);letter-spacing:.05em;opacity:0;transition:opacity 1s ease .35s}
+.gw.on .say,.s3.on .say{opacity:1}
+.g1 .say{top:16%;color:rgba(195,210,203,.3);text-shadow:0 0 10px rgba(190,210,200,.18)}                 /* very dim */
+.g1.left .say{left:100%;margin-left:.4rem}.g1.right .say{right:100%;margin-right:.4rem;text-align:right}
+.g2 .say,.s3 .say{padding:.55rem .85rem;background:rgba(2,6,6,.82);border:1px solid rgba(120,200,170,.4);color:#b9d2c8;
+  box-shadow:0 0 16px rgba(110,200,165,.24),inset 0 0 12px rgba(0,0,0,.8);text-shadow:0 0 8px rgba(120,210,170,.5)}
+.g2 .say{top:12%}
+.g2.left .say{left:62%}.g2.right .say{right:62%;text-align:right}
+
+/* eyes in the dark: ~5% glow, the irises follow your cursor */
+.eyes{position:absolute;display:flex;gap:calc(var(--sz,1) * 24px);opacity:0;animation:eyelife var(--life,5s) ease-in-out forwards;filter:drop-shadow(0 0 7px rgba(205,230,220,.8))}
+.eyes svg{width:calc(var(--sz,1) * 46px);height:calc(var(--sz,1) * 22px);overflow:visible}
+@keyframes eyelife{0%{opacity:0}18%,78%{opacity:var(--g,.06)}83%{opacity:0}87%,92%{opacity:var(--g,.06)}100%{opacity:0}}
+
+/* handprints on the other side of the glass */
+.hp{position:absolute;opacity:0;transition:opacity .6s ease}
+.hp.on{opacity:var(--o,.2)}
+.hp.slam{transition:none;animation:slam .38s cubic-bezier(.2,1.5,.4,1)}
+@keyframes slam{0%{scale:1.16}100%{scale:1}}
+
+/* Silhouette 3: a black box, a dying TV, lights losing their minds */
+.s3{position:fixed;bottom:0;z-index:139;width:min(15vw,220px);height:min(82vh,760px);background:#000;opacity:0;box-shadow:0 0 0 1px rgba(255,255,255,.06),0 0 70px 16px #000}
+.s3.left{left:4%}.s3.right{right:4%}
+.s3.on{opacity:1}
+.s3 .say{top:6%;width:max-content;max-width:min(250px,40vw)}
+.s3.left .say{left:100%;margin-left:.7rem}.s3.right .say{right:100%;margin-right:.7rem;text-align:right}
+#static{position:fixed;inset:0;width:100%;height:100%;z-index:140;pointer-events:none;opacity:0;image-rendering:pixelated;mix-blend-mode:screen}
+#scan{position:fixed;inset:0;z-index:141;pointer-events:none;opacity:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 2px,transparent 2px 4px)}
+#scan::after{content:"";position:absolute;left:0;right:0;top:-24%;height:20%;background:linear-gradient(transparent,rgba(255,255,255,.16),transparent);animation:roll 1.1s linear infinite}
+@keyframes roll{to{top:110%}}
+html.glitch main,html.glitch #room,html.glitch .room{animation:glitch .15s steps(2) infinite}
+html.glitch.calm main,html.glitch.calm #room,html.glitch.calm .room{animation:none}
+@keyframes glitch{0%{transform:translate(-6px,2px) skewX(-1deg);filter:hue-rotate(40deg) saturate(1.9) drop-shadow(4px 0 0 rgba(255,0,70,.5)) drop-shadow(-4px 0 0 rgba(0,255,255,.45))}
+  50%{transform:translate(7px,-3px) skewX(1deg);filter:hue-rotate(-60deg) contrast(1.5)}100%{transform:translate(-2px,0)}}
+
+/* the "you must switch the light off before you go" pop-up */
+#leave{position:fixed;inset:0;z-index:58;display:grid;place-items:center;background:rgba(0,0,0,.78);opacity:0;pointer-events:none;transition:opacity .35s}
+#leave[hidden]{display:none}
+#leave.on{opacity:1;pointer-events:auto}
+.leave-box{max-width:min(450px,88vw);padding:1.7rem 1.9rem 1.5rem;text-align:center;background:linear-gradient(#10161a,#070a0b);border:1px solid #2a3633;
+  box-shadow:0 0 0 1px #000,0 0 54px rgba(122,18,18,.38),inset 0 0 34px #000}
+.leave-box h3{margin:0 0 .6rem;font:400 1.85rem var(--goth);color:#cdc5ae;text-shadow:0 0 14px rgba(122,18,18,.65)}
+.leave-box p{margin:0 0 1.3rem;font:.92rem/1.55 var(--type);color:#98a79f}
+.leave-box .row{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap}
+#fade{position:fixed;inset:0;z-index:300;background:#000;opacity:0;pointer-events:none;transition:opacity .8s ease}
+#fade.on{opacity:1;pointer-events:auto}
+
+/* epilepsy mode: no strobing, no shaking, no hard flashes */
+body.safe::after{animation:none}
+body.safe::before{animation:none}
+body.safe .mark{animation:none}
+body.safe #room.flick{animation:none}
+body.safe #flash.go{animation:flash-soft 1.2s ease-out}
+body.safe .hp.slam{animation:none}
+body.safe .lamp-swing{animation-duration:4s}
+body.safe #scan::after{animation:none;opacity:0}
+@keyframes flash-soft{0%{opacity:.28}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){#scan::after{animation:none}.eyes{animation-duration:8s}}
+
+/* the black box: pure black, but with a hair of edge so you can tell where it stands */
+.s3{box-shadow:0 0 0 1px rgba(255,255,255,.15),0 0 70px 16px #000}

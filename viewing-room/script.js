@@ -6,8 +6,8 @@ const CASE = {                             // what the case file says
   title: "UNIDENTIFIED MALE",
   no: "2009-0314-07",
   rows: [
-    ["Estimated age", "34 (\u00B1 4 years)"], ["Sex", "Male"], ["Height / weight", "178 cm / 71 kg"], ["Hair / eyes", "Dark brown / closed"],
-    ["Recovered", "14 March 2009, 02:47"], ["Location", "Riverbank, below the north bridge"], ["Time since death", "36\u201348 hours (est.)"],
+    ["Estimated age", "17 (\u00B1 1 years)"], ["Sex", "Male"], ["Height / weight", "158 cm / 85 kg"], ["Hair / eyes", "Dark brown / closed"],
+    ["Recovered", "14 March 2026, 02:47"], ["Location", "Riverbank, below the north bridge"], ["Time since death", "36\u201348 hours (est.)"],
     ["Cause of death", "Pending examination"], ["Marks", "Healed fracture, left wrist. No tattoos."], ["Effects", "None recovered"]
   ],
   notes: "Rigor does not match the estimate. He was still warm when we brought him in. Please don't leave the room dark."
@@ -20,24 +20,31 @@ let revealed = false, drag = null;
 
 // ===== Opening: a cold-room door swings open, then you walk through it =====
 const intro = $("intro");
-let introPending = !!intro && !reduce;
+let introPending = !!intro;
+let safeMode = true; try { safeMode = localStorage.getItem("morgue.safe") !== "0"; } catch (e) {}   // epilepsy mode: ON unless you switched it off
+let chaos = 0;                                                  // extra flicker pushed in by the black box (-1 to 1)
 function openIntro() {
-  if (!introPending || intro.classList.contains("go")) return;
-  intro.classList.add("go");
+  if (!introPending) return;
+  if (intro.classList.contains("go")) { intro.classList.add("through"); return; }    // a second click hurries you through
+  intro.classList.add("go");                                    // the lever drops, the door swings
   playDoor();
-  setTimeout(() => intro.classList.add("through"), 2100);
-  setTimeout(() => { intro.remove(); introPending = false; document.body.classList.remove("introing"); if (!lampLit) darkSince = performance.now(); }, 3500);
+  const k = reduce ? .45 : 1;                                   // reduced motion: the door fades open instead of swinging
+  setTimeout(() => intro.classList.add("through"), 3100 * k);
+  setTimeout(() => { intro.remove(); introPending = false; document.body.classList.remove("introing"); if (!lampLit) darkSince = performance.now(); }, 4600 * k);
 }
-if (intro && reduce) intro.remove();
 if (introPending) {
   document.body.classList.add("introing");
   intro.addEventListener("click", openIntro);
   addEventListener("keydown", e => { if (introPending && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openIntro(); } });
-  setTimeout(openIntro, 4500);
+  setTimeout(openIntro, reduce ? 2500 : 6500);
 }
 
 // ===== the photo =====
-const loadImg = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
+const loadImg = src => new Promise(r => {
+  const i = new Image();
+  i.onload = async () => { try { r(await createImageBitmap(i)); } catch (e) { r(i); } };   // a bitmap has the true, upright size (phone photos are often stored sideways)
+  i.onerror = () => r(null); i.src = src;
+});
 function placeholder() {                   // a stand-in face: used for the mosaic when there is no photo yet
   const c = document.createElement("canvas"); c.width = 600; c.height = 800; const x = c.getContext("2d");
   x.fillStyle = "#222a29"; x.fillRect(0, 0, 600, 800);
@@ -70,19 +77,24 @@ function leak(img) {
   const [sx, sy, sw, sh] = cropOf(img, W / H);
   const lo = document.createElement("canvas"); lo.width = 150; lo.height = 200; lo.getContext("2d").drawImage(img, sx, sy, sw, sh, 0, 0, 150, 200);
   x.drawImage(lo, 0, 0, W, H);                                                                        // low-res capture, blown up
+  const lo2 = document.createElement("canvas"); lo2.width = 70; lo2.height = 93; lo2.getContext("2d").drawImage(lo, 0, 0, 70, 93);
+  x.imageSmoothingEnabled = false; x.globalAlpha = .26; x.drawImage(lo2, 0, 0, W, H); x.imageSmoothingEnabled = true;   // blocky compression artefacts
+  x.globalCompositeOperation = "screen"; x.globalAlpha = .55; x.drawImage(lo, 0, 0, W, H);            // auto-exposure: a dark photo is lifted, a bright one just blows out like a flash
+  x.globalAlpha = 1;
   x.globalCompositeOperation = "saturation"; x.fillStyle = "#808080"; x.globalAlpha = .66; x.fillRect(0, 0, W, H);   // drained colour
-  x.globalCompositeOperation = "overlay"; x.globalAlpha = .75; x.drawImage(lo, 0, 0, W, H);           // harsh contrast
+  x.globalCompositeOperation = "overlay"; x.globalAlpha = .6; x.drawImage(lo, 0, 0, W, H);           // harsh contrast
   x.globalCompositeOperation = "screen"; x.globalAlpha = 1;
   let g = x.createRadialGradient(W * .5, H * .42, 10, W * .5, H * .42, W * .6); g.addColorStop(0, "rgba(255,246,220,.42)"); g.addColorStop(1, "rgba(255,246,220,0)");
   x.fillStyle = g; x.fillRect(0, 0, W, H);                                                            // flash hotspot
   x.globalCompositeOperation = "multiply";
-  g = x.createRadialGradient(W * .5, H * .45, H * .2, W * .5, H * .5, H * .72); g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(1, "rgba(0,0,0,.75)");
+  g = x.createRadialGradient(W * .5, H * .45, H * .2, W * .5, H * .5, H * .72); g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(1, "rgba(0,0,0,.5)");
   x.fillStyle = g; x.fillRect(0, 0, W, H);                                                            // dark corners
-  x.fillStyle = "rgba(215,225,190,1)"; x.globalAlpha = .22; x.fillRect(0, 0, W, H);                  // sickly cast
+  x.fillStyle = "rgba(215,225,190,1)"; x.globalAlpha = .14; x.fillRect(0, 0, W, H);                  // sickly cast
+  x.globalCompositeOperation = "screen"; x.fillStyle = "rgb(34,38,34)"; x.globalAlpha = .6; x.fillRect(0, 0, W, H);   // lift the blacks, so a dark photo does not vanish
   const n = document.createElement("canvas"); n.width = W / 2; n.height = H / 2; const nx = n.getContext("2d"), nd = nx.createImageData(n.width, n.height);
   for (let i = 0; i < nd.data.length; i += 4) { const v = Math.random() * 255; nd.data[i] = nd.data[i + 1] = nd.data[i + 2] = v; nd.data[i + 3] = 255; }
   nx.putImageData(nd, 0, 0);
-  x.globalCompositeOperation = "overlay"; x.globalAlpha = .55; x.drawImage(n, 0, 0, W, H);            // grain
+  x.globalCompositeOperation = "overlay"; x.globalAlpha = .42; x.drawImage(n, 0, 0, W, H);            // grain
   x.globalCompositeOperation = "source-over"; x.globalAlpha = 1; x.fillStyle = "rgba(0,0,0,.09)";
   for (let y = 0; y < H; y += 2) x.fillRect(0, y, W, 1);                                              // scanlines
   return new Promise(res => {
@@ -97,11 +109,19 @@ function leak(img) {
     const j = new Image(); j.onload = () => { x.drawImage(j, 0, 0); stamp(); }; j.src = url;
   });
 }
+// the photo is looked for as PHOTO first, then as face1 / face / photo with .jpg .jpeg .png .webp (any capitals) in the images folder
+const PHOTO_TRY = [PHOTO, ...["face1", "face", "photo"].flatMap(n => ["jpg", "jpeg", "png", "webp", "JPG", "JPEG", "PNG"].map(x => `images/${n}.${x}`))];
+async function findPhoto() { for (const p of [...new Set(PHOTO_TRY)]) { const im = await loadImg(p); if (im) return { im, path: p }; } return null; }
 (async () => {
-  photo = await loadImg(PHOTO);
-  drawMosaic(photo || placeholder());
-  $("holder-path").textContent = "place your photo at " + PHOTO;
-  if (photo) { const c = await leak(photo); $("pic").getContext("2d").drawImage(c, 0, 0); $("pic").parentNode.classList.add("has"); }
+  const msg = $("holder-path"), pic = $("pic");
+  const found = await findPhoto();
+  photo = found && found.im;
+  try { drawMosaic(photo || placeholder()); } catch (e) { console.warn("mosaic failed:", e); }
+  msg.textContent = "place your photo at " + PHOTO + "  (jpg, jpeg, png or webp)";
+  if (photo) {
+    try { const c = await leak(photo); pic.getContext("2d").drawImage(c, 0, 0); pic.parentNode.classList.add("has"); }
+    catch (e) { console.warn("photo filter failed:", e); msg.textContent = found.path + " loaded, but could not be processed: " + e.message; }
+  }
 })();
 
 // ===== the case file =====
@@ -110,8 +130,8 @@ $("f-list").innerHTML = CASE.rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).
 const file = $("file");
 function openFile() { file.hidden = false; requestAnimationFrame(() => requestAnimationFrame(() => file.classList.add("open"))); $("f-close").focus({ preventScroll: true }); }
 function closeFile() { file.classList.remove("open"); setTimeout(() => { file.hidden = true; }, 400); }
-face.addEventListener("click", () => { if (revealed) openFile(); });
-face.addEventListener("keydown", e => { if (revealed && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openFile(); } });
+face.addEventListener("click", () => { if (revealed && !window.__s3) openFile(); });
+face.addEventListener("keydown", e => { if (revealed && !window.__s3 && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openFile(); } });
 $("f-close").addEventListener("click", closeFile);
 file.addEventListener("click", e => { if (e.target === file) closeFile(); });
 addEventListener("keydown", e => { if (e.key === "Escape" && !file.hidden) closeFile(); });
@@ -150,6 +170,7 @@ const startFlicker = () => flickAt = performance.now();
 function flickLevel(now) {
   if (flickAt < 0) return 0;
   const e = now - flickAt;
+  if (safeMode) { if (e > 1100) { flickAt = -1; return 0; } return .42 * Math.sin(Math.PI * e / 1100); }   // epilepsy mode: one slow, gentle dip instead of a strobe
   if (e > FLICKER_END) { flickAt = -1; return 0; }
   let lv = 0; for (const [t, l] of FLICKER) if (e >= t) lv = l; return lv;
 }
@@ -215,7 +236,7 @@ const LINES = ["stop fighting it", "rest now", "let it go", "the dark is kind", 
   "leave it dark", "you don't need the light", "it's quiet under the sheet", "stay a while"];
 const rnd = (a, b) => a + Math.random() * (b - a);
 const pick = arr => arr[Math.random() * arr.length | 0];
-let nextSpawn = 0, figure = null;
+let nextSpawn = 0;
 function spawn(i) {
   if (halluc.children.length > 7) return;
   const el = document.createElement("i");
@@ -234,15 +255,9 @@ function hallucTick(now) {
   halluc.classList.toggle("on", active); slab.classList.toggle("haunted", active);
   halluc.style.setProperty("--hi", i.toFixed(3));
   if (active) {
-    if (i > .25 && !figure) { figure = document.createElement("i"); figure.className = "figure"; halluc.appendChild(figure); }
-    if (figure) figure.style.setProperty("--s", (.6 + .9 * i).toFixed(2));          // it creeps closer
     if (nextSpawn === 0) nextSpawn = now + 3500;
-    if (now > nextSpawn) {
-      spawn(i);
-      if (figure && Math.random() < .3) figure.style.left = (Math.random() < .5 ? 5 : 84) + "%";   // and it is never where you left it
-      nextSpawn = now + (6500 - 5000 * i) * rnd(.6, 1.4);
-    }
-  } else if (halluc.firstChild) { halluc.replaceChildren(); figure = null; nextSpawn = 0; }     // the light kills them instantly
+    if (now > nextSpawn) { spawn(i); nextSpawn = now + (6500 - 5000 * i) * rnd(.6, 1.4); }
+  } else if (halluc.firstChild) { halluc.replaceChildren(); nextSpawn = 0; }     // the light chases them off
 }
 
 // ---------- dim glowing lights: something to find in the dark ----------
@@ -274,9 +289,9 @@ let dk = DARK_MAX, lastD = performance.now();
 function applyDark(now) {
   const f = flickLevel(now), target = lampLit ? 0 : DARK_MAX, step = now - lastD; lastD = now;
   dk = reduce ? target : (target > dk ? Math.min(target, dk + step / 120) : Math.max(target, dk - step / 250));   // blacks out fast, brightens a little slower
-  const v = Math.max(dk, .9 * f);                               // every flicker cuts the light
+  const v = Math.min(DARK_MAX, Math.max(0, Math.max(dk, .9 * f) + chaos));                               // every flicker cuts the light
   dark.style.setProperty("--dk", v.toFixed(3));
-  lamp.style.setProperty("--lit", (1 - .85 * f).toFixed(2));   // the bulb dims with every flicker
+  lamp.style.setProperty("--lit", (1 - .85 * Math.max(f, Math.abs(chaos))).toFixed(2));   // the bulb dims with every flicker
   updateGlows(v);
 }
 
@@ -298,10 +313,11 @@ let lastA = performance.now();
   const bz = sfx.buzz;
   if (!reduce && !bz.paused && bz.duration) {
     const left = (bz.duration - bz.currentTime) * 1000;
-    if (left > 0 && left <= FLICKER_END) { if (!buzzFlicked) { buzzFlicked = true; flickAt = now - (FLICKER_END - left); } }
+    if (left > 0 && left <= FLICKER_END) { if (!buzzFlicked) { buzzFlicked = true; flickAt = safeMode ? now : now - (FLICKER_END - left); } }
     else if (left > FLICKER_END + 500) buzzFlicked = false;
   }
   applyDark(now);
   if (!reduce) hallucTick(now);
+  if (typeof Atmos !== "undefined") Atmos.tick();
   requestAnimationFrame(frame);
 })();
