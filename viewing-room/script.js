@@ -1,10 +1,10 @@
 /* ===== EDIT HERE ===== */
 const PHOTO = "images/face1.jpg";          // the photo for the case file (it is shown with a grainy "leaked photo" filter). Missing = a placeholder is shown instead.
 const WATERMARK = "UNVERIFIED";            // small text in the corner of the "leaked" photo
-const STAMP = "03.14.2009  02:47";         // camera date stamp on the photo
+const STAMP = "03.14.2025  02:47";         // camera date stamp on the photo
 const CASE = {                             // what the case file says
   title: "UNIDENTIFIED MALE",
-  no: "2009-0314-07",
+  no: "2026-0314-07",
   rows: [
     ["Estimated age", "# (\u00B1 1 years)"], ["Sex", "Male"], ["Height / weight", "158 cm / 85 kg"], ["Hair / eyes", "Dark brown / closed"],
     ["Recovered", "14 March 2026, 02:47"], ["Location", "Riverbank, below the north bridge"], ["Time since death", "36\u201348 hours (est.)"],
