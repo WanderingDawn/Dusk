@@ -6,8 +6,8 @@ const CASE = {                             // what the case file says
   title: "UNIDENTIFIED MALE",
   no: "2009-0314-07",
   rows: [
-    ["Estimated age", "17 (\u00B1 1 years)"], ["Sex", "Male"], ["Height / weight", "158 cm / 85 kg"], ["Hair / eyes", "Dark brown / closed"],
-    ["Recovered", "14 March 2026, 02:47"], ["Location", "Riverbank, below the north bridge"], ["Time since death", "undetermined"],
+    ["Estimated age", "# (\u00B1 1 years)"], ["Sex", "Male"], ["Height / weight", "158 cm / 85 kg"], ["Hair / eyes", "Dark brown / closed"],
+    ["Recovered", "14 March 2026, 02:47"], ["Location", "Riverbank, below the north bridge"], ["Time since death", "36\u201348 hours (est.)"],
     ["Cause of death", "Pending examination"], ["Marks", "Healed fracture, left wrist. No tattoos."], ["Effects", "None recovered"]
   ],
   notes: "Rigor does not match the estimate. He was still warm when we brought him in. Please don't leave the room dark."
@@ -270,54 +270,4 @@ const GLOWS = [
 GLOWS.forEach(g => {
   g.t = g.el ? document.querySelector(g.el) : null;
   g.node = document.createElement("i"); g.node.className = "led " + (g.cls || "");
-  g.node.style.cssText = `width:${g.w}px;height:${g.h}px;--c:${g.c}`;
-  if (g.text) g.node.textContent = g.text;
-  glowLayer.appendChild(g.node);
-});
-function updateGlows(v) {                                       // v: how dark it is right now (0 to 1)
-  const show = Math.max(0, Math.min(1, (v - .6) / .3));         // they only appear once it is properly dark
-  GLOWS.forEach(g => {
-    g.node.style.opacity = show > 0 ? (show * .55).toFixed(2) : 0;   // very dim
-    if (show <= 0) return;
-    const r = g.t ? g.t.getBoundingClientRect() : { left: 0, top: 0, width: innerWidth, height: innerHeight };
-    g.node.style.transform = `translate(${(r.left + r.width * g.x - g.w / 2).toFixed(1)}px,${(r.top + r.height * g.y - g.h / 2).toFixed(1)}px)`;
-  });
-}
-
-// ---------- darkness ----------
-let dk = DARK_MAX, lastD = performance.now();
-function applyDark(now) {
-  const f = flickLevel(now), target = lampLit ? 0 : DARK_MAX, step = now - lastD; lastD = now;
-  dk = reduce ? target : (target > dk ? Math.min(target, dk + step / 120) : Math.max(target, dk - step / 250));   // blacks out fast, brightens a little slower
-  const v = Math.min(DARK_MAX, Math.max(0, Math.max(dk, .9 * f) + chaos));                               // every flicker cuts the light
-  dark.style.setProperty("--dk", v.toFixed(3));
-  lamp.style.setProperty("--lit", (1 - .85 * Math.max(f, Math.abs(chaos))).toFixed(2));   // the bulb dims with every flicker
-  updateGlows(v);
-}
-
-// ---------- one frame loop ----------
-let lastA = performance.now();
-(function frame() {
-  const now = performance.now(), dt = Math.max(0, now - lastA); lastA = now;
-  // the buzz fades in/out smoothly and cuts out with every flicker
-  buzzEnv = buzzWanted ? Math.min(1, buzzEnv + dt / 200) : Math.max(0, buzzEnv - dt / 250);
-  sfx.buzz.volume = BUZZ_VOL * buzzEnv * (1 - .9 * Math.min(1, flickLevel(now)));
-  if (!buzzWanted && buzzEnv === 0 && !sfx.buzz.paused) { sfx.buzz.pause(); sfx.buzz.currentTime = 0; }
-  // whispers: silent until the hallucinations start, then louder and louder; gone the moment the light is back
-  const wT = (soundOn && unlocked && !document.hidden && hallucActive(now)) ? WHISPER_MAX * (.04 + .96 * intensity(now)) : 0;
-  whVol += (wT - whVol) * Math.min(1, dt / (wT > whVol ? 900 : 250));
-  sfx.whisper.volume = Math.min(1, Math.max(0, whVol));
-  if (wT > 0 && sfx.whisper.paused) sfx.whisper.play().catch(() => {});
-  if (wT === 0 && whVol < .01 && !sfx.whisper.paused) { sfx.whisper.pause(); sfx.whisper.currentTime = 0; whVol = 0; }
-  // loop-synced flicker: start the light flicker as the baked-in stutter at the end of the buzz begins
-  const bz = sfx.buzz;
-  if (!reduce && !bz.paused && bz.duration) {
-    const left = (bz.duration - bz.currentTime) * 1000;
-    if (left > 0 && left <= FLICKER_END) { if (!buzzFlicked) { buzzFlicked = true; flickAt = safeMode ? now : now - (FLICKER_END - left); } }
-    else if (left > FLICKER_END + 500) buzzFlicked = false;
-  }
-  applyDark(now);
-  if (!reduce) hallucTick(now);
-  if (typeof Atmos !== "undefined") Atmos.tick();
-  requestAnimationFrame(frame);
-})();
+  g.node.style.cssText = `width:${g.w}px;height:
